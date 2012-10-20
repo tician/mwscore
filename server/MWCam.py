@@ -19,9 +19,9 @@ SOCKET_CLIENT_HOST = "localhost"
 SOCKET_CLIENT_PORT = 2525
 
 # IP Camaera
-CAMERA_IP = "192.168.1.103"
+CAMERA_IP = "192.168.1.106"
 CAMERA_USERNAME = "admin"
-CAMERA_PASSWORD = "admin"
+CAMERA_PASSWORD = ""
 CAMERA_SIZE_WIDTH = 620
 CAMERA_SIZE_HEIGHT = 480
 CAMERA_SIZE = (CAMERA_SIZE_WIDTH, CAMERA_SIZE_HEIGHT)
@@ -105,16 +105,38 @@ class DLink( Camera ):
 
 	def __init__( self, ip, username, password ):
 		Camera.__init__( self, ip, username, password )
-		pass
 		
 	def Connect( self ):
-		pass
+		if self.Connected == False:
+			try:
+				print "Attempting to connect to camera", self.IP, self.Username, self.Password
+				h = httplib.HTTP( self.IP )
+				h.putrequest( "GET", "/video/mjpg.cgi" )
+				h.putheader( "Authorization", "Basic %s" % base64.encodestring( "%s:%s" % (self.Username, self.Password))[:-1] )
+				h.endheaders()
+				errcode, ermsg, headers = h.getreply()
+				self.File = h.getfile()
+				print "Connected!"
+				self.Connected = True
+			except:
+				print "Unable to connect!"
+				self.Connected = False
 		
 	def Disconnect( self ):
-		pass
+		self.Connected = False
+		print "Camear Disconnected!"
 		
 	def Update( self ):
-		pass
+		if self.Connected:
+			s = self.File.readline() # "--video boundry--'
+			s = self.File.readline() # "Content-Length: #####"
+			framesize = int(s[16:])
+			s = self.File.readline() # "Date: ##-##-#### ##:##:## AM IO_00000000_PT_000_000"
+			s = self.File.readline() # "Content-type: image/jpeg"
+			s = self.File.read( framesize ) # jpeg data
+			while s[0] != chr(0xff):
+				s = s[1:]
+			return StringIO.StringIO(s)
 
 """
 
@@ -193,7 +215,8 @@ class MWCam( wx.Frame ):
 		self.SocketClient.StartThread()
 		
 		# IP Camera
-		self.Camera = Trendnet( CAMERA_IP, CAMERA_USERNAME, CAMERA_PASSWORD )
+		#self.Camera = Trendnet( CAMERA_IP, CAMERA_USERNAME, CAMERA_PASSWORD )
+		self.Camera = DLink( CAMERA_IP, CAMERA_USERNAME, CAMERA_PASSWORD )
 		self.Camera.Connect()
 		
 		# Camera Panel
