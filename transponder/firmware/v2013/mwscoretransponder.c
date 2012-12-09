@@ -21,10 +21,11 @@
 
 #define XBEE_BAUDRATE 38400
 
-#define PANEL1 2
-#define PANEL2 4
-#define PANEL3 8
-#define PANEL4 16
+#define PANELMASK  240
+#define PANEL1     112
+#define PANEL2     176
+#define PANEL3     208
+#define PANEL4     224
 
 #define MS_COOLDOWN 1000
 #define MS_SIGNAL 50
@@ -82,12 +83,12 @@ int main(void)
 	while(1)
 	{
 		if(hit != 0)
-		{
+		{		
 			// determine panel that was hit
-			if      (!(hit & PANEL1)) { delay = MS_SIGNAL * 1; panel = 1; }
-			else if (!(hit & PANEL2)) { delay = MS_SIGNAL * 2; panel = 2; }
-			else if (!(hit & PANEL3)) { delay = MS_SIGNAL * 3; panel = 3; }
-			else if (!(hit & PANEL4)) { delay = MS_SIGNAL * 4; panel = 4; }
+			if      ((hit & PANELMASK) == PANEL1) { delay = MS_SIGNAL * 1; panel = 1; }
+			else if ((hit & PANELMASK) == PANEL2) { delay = MS_SIGNAL * 2; panel = 2; }
+			else if ((hit & PANELMASK) == PANEL3) { delay = MS_SIGNAL * 3; panel = 3; }
+			else if ((hit & PANELMASK) == PANEL4) { delay = MS_SIGNAL * 4; panel = 4; }
 			
 			if(panel != 0)
 			{			
@@ -98,7 +99,7 @@ int main(void)
 				id = PINC;
 				tx((uint8_t) 0x55);
 				tx((uint8_t) id);
-				tx((uint8_t) (255 - id));
+				tx((uint8_t) (0xff - id));
 				tx((uint8_t) panel);
 			
 				// delay and reset hit output
