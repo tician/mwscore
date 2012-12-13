@@ -89,6 +89,7 @@ int main(void)
 			else if ((hit & PANELMASK) == PANEL2) { delay = MS_SIGNAL * 2; panel = 2; }
 			else if ((hit & PANELMASK) == PANEL3) { delay = MS_SIGNAL * 3; panel = 3; }
 			else if ((hit & PANELMASK) == PANEL4) { delay = MS_SIGNAL * 4; panel = 4; }
+			else                                  { delay = MS_SIGNAL * 5; panel = 5; }
 			
 			if(panel != 0)
 			{			
