@@ -9,7 +9,7 @@
 	CH   = c
 	
 	ATMEGA328 Fuse Setting:
-	$ sudo avrdude -P usb -c avrispmkII -p m328p -B 100 -F -U lfuste:w:0xce:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
+	$ sudo avrdude -P usb -c avrispmkII -p m328p -B 100 -F -U lfuse:w:0xce:m -U hfuse:w:0xdf:m -U efuse:w:0xff:m
 
 	To Program:
 	$ sudo make program
@@ -93,7 +93,7 @@ int main(void)
 			if(panel != 0)
 			{			
 				// hit output high
-				PORTD |= (1 << PD2);
+				PORTD |= (1 << PD3);
 
 				// tx hit packet			
 				id = PINC;
@@ -104,14 +104,14 @@ int main(void)
 			
 				// delay and reset hit output
 				_delay_ms(delay);
-				PORTD &= ~(1 << PD2);
+				PORTD &= ~(1 << PD3);
 			
 				// blink LED board 3 times
 				for (int x = 0; x < 3; x++)
 				{
-					PORTD |=  (1 << PD3);
+					PORTD |=  (1 << PD2);
 					_delay_ms(LED_RATE);
-					PORTD &= ~(1 << PD3);
+					PORTD &= ~(1 << PD2);
 					_delay_ms(LED_RATE);
 				}
 			
