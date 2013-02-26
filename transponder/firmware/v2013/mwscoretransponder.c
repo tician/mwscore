@@ -40,6 +40,12 @@ ISR(PCINT2_vect)
 	hit = PIND;
 }
 
+void delay_ms(uint16_t count) {
+  while(count--) {
+    _delay_ms(1);
+  }
+} 
+
 void tx(uint8_t c)
 {
 	while(bit_is_clear(UCSR0A, UDRE0));
@@ -96,28 +102,28 @@ int main(void)
 				// hit output high
 				PORTD |= (1 << PD3);
 
-				// tx hit packet			
-				id = PINC;
+				// tx hit packet
+				id = 63 - (0x3f & PINC);
 				tx((uint8_t) 0x55);
 				tx((uint8_t) id);
 				tx((uint8_t) (0xff - id));
 				tx((uint8_t) panel);
 			
 				// delay and reset hit output
-				_delay_ms(delay);
+				delay_ms(delay);
 				PORTD &= ~(1 << PD3);
 			
 				// blink LED board 3 times
 				for (int x = 0; x < 3; x++)
 				{
 					PORTD |=  (1 << PD2);
-					_delay_ms(LED_RATE);
+					delay_ms(LED_RATE);
 					PORTD &= ~(1 << PD2);
-					_delay_ms(LED_RATE);
+					delay_ms(LED_RATE);
 				}
 			
 				// delay for the remaining cooldown period
-				_delay_ms(MS_COOLDOWN - LED_PERIOD - delay);
+				delay_ms(MS_COOLDOWN - LED_PERIOD - delay);
 			}
 			
 			// reset variables
