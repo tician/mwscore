@@ -1,7 +1,7 @@
-#include <Wire.h>
-#include <SoftwareSerial.h>
+#include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
+#include <EEPROM.h>
 
-#include <avr/EEPROM.h>
 // Your 16-bit transponder ID number
 uint16_t BotID EEMEM = 0x0002;
 // Your bot name
@@ -10,37 +10,20 @@ char BotNAME[64] PROGMEM = "mynyr";
 char TeamNAME[64] PROGMEM = "doofus";
 
 
-SoftwareSerial *bogusBus;//(10, 9); // RX, TX
-bool usingBogusBus = false;
-
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define XBEE_RESET	5
-#define SOFT_TXD_EN	10
+#define D_DATA		0
+#define D_PULSE		2
+#define D_LEDHIT 	15
 
-#define D_BOOM		6
-#define D_GAMEON	7
-#define D_LEDHIT 	8
-#define D_FLAG		9
-
-#define LED_USR		13
-#define LED_Q1		14
-#define LED_Q2		15
-#define LED_Q3		16
-#define LED_Q4		17
-
-#define BASE_PANEL_ID	0x42
 uint8_t numPanels = 0;
-
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void setup()
 {
-	pinMode(SOFT_TXD_EN, INPUT);		// Check if using SoftSerial on FLAG pin
-	digitalWrite(SOFT_TXD_EN, HIGH);	// Enable pull-up resistor
+	pinMode(D_DATA, INPUT);				// Set DATA_PIN to input
+//	digitalWrite(D_DATA, HIGH);			// Enable pull-up resistor
 
-	pinMode(D_BOOM, OUTPUT);			// Set HIT/BOOM/DEAD to output
-	digitalWrite(D_BOOM, LOW);			// Set output LOW
 	pinMode(D_GAMEON, OUTPUT);			// Set GAMEON to output
 	digitalWrite(D_GAMEON, LOW);		// Set output LOW
 	pinMode(D_LEDHIT, OUTPUT);			// Set LEDHIT to output
@@ -137,7 +120,7 @@ Default values grabbed from EEPROM at boot
 /// ID may not be 0xFFFF, 0xFFFE, 0xFFFA, 0xFFF5, 0x0000
 
 /// NAN MechWarfare Control System Packet
-Header		UINT24				0xFF 0xFF 0xF5 
+Header		UINT32				0xFF 0xFF 0xF5 0x00
 State		UINT16				GAME STATE
 									GxCC xTTT TTTT TTTT
 										G = 1 (GAMEON) or 0 (GAMEOFF)
@@ -149,7 +132,7 @@ State		UINT16				GAME STATE
 										x = unused
 Length		UINT8				Length of DATA array in bytes
 DATA		UINT8[len]			Data array
-Checksum	UINT8				Sum of all bytes in packet
+CRC			UINT16				DXL2.0 CRC
 
 DATA array types
 	REGULAR_STATUS_UPDATE ( length = (3*N) )
@@ -174,11 +157,11 @@ DATA array types
 		nBcns	UINT8				Number Beacons/Bases/Powerups
 
 /// NAN MechWarfare Transponder Response Packet
-Header		UINT24				0xFF 0xFF 0xFA
+Header		UINT32				0xFF 0xFF 0xFA 0x00
 ID			UINT16				Transponder ID
 Length		UINT8				Length of DATA array in bytes
 DATA		UINT8[len]			Data array
-Checksum	UINT8				Sum of all bytes in packet
+CRC			UINT16				DXL2.0 CRC
 
 DATA array types
 	POLL_TRANSPONDER response (bot) ( length = 1 )
