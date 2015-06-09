@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- *  Copyright (c) 2012, 2013, 2014 Matthew Paulishen. All rights reserved.
+ *  Copyright (c) 2012, 2013, 2014, 2015 Matthew Paulishen. All rights reserved.
  *  
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -126,6 +126,25 @@ uint8_t EEMEM eep_myID = 0;
 uint8_t EEMEM eep_fsr_sdph = 5;	// Sequential ADC Detections Per Hit
 uint8_t EEMEM eep_fsr_threshold = 230;	// ADC Threshold for Detection
 
+/*
+MW_ITB_I2C properties
+	ADDR: NAME
+	0x00: Status register
+		Bit-0: (R-) IM_HIT (cleared when READ by master)
+		Bit-1: (-W) OTHER_HIT
+		Bit-2: (-W) HAVE_FLAG
+		Bit-3: (RW) RESERVED for future use
+
+		Bit-4: (-W) Save current ID to EEPROM
+		Bit-5: (-W) Save current FSR_SDPH to EEPROM
+		Bit-6: (-W) Save current FSR_THR to EEPROM
+		Bit-7: (-W) RESET (to EEPROM defaults using WDReset)
+
+Default values grabbed from EEPROM at boot
+	0x01: ID register									(RW) (0x00~0x1F)
+	0x02: FSR Sequential Detections Per Hit register	(RW) (1~50)
+	0x03: FSR Threshold register						(RW) (50~250)
+*/
 volatile uint8_t conti_table[] =
 {
 	0x00,	// Status register
@@ -140,11 +159,10 @@ volatile uint8_t conti_table[] =
 				// Bit-7: (-W) RESET (to EEPROM defaults using WDReset)
 
 // Default values grabbed from EEPROM at boot
-	0x00,	// ID register (RW) (1~12)
-	0x00,	// FSR Sequential Detections Per Hit register (RW) (1~50)
-	0x00	// FSR Threshold register (RW) (50~250)
+	0x00,	// ID register									(RW) (0x00~0x1F)
+	0x00,	// FSR Sequential Detections Per Hit register	(RW) (1~50)
+	0x00	// FSR Threshold register						(RW) (50~250)
 };
-
 const uint8_t conti_size = sizeof(conti_table);
 // Tracks the current register pointer position
 volatile uint8_t conti_pos;
@@ -570,7 +588,7 @@ void loop()
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// I2C Slave Mode
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	if (I2C_ENABLED==1)
+	else if (I2C_ENABLED==1)
 	{
 		// Set device address to Panel number plus 0x42
 		usiTwiSlaveInit(conti_table[1]+BASE_PANEL_ID);
