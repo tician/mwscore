@@ -36,6 +36,18 @@
 /// ALL TRANSMISSIONS LITTLE-ENDIAN
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+/// NAN MechWarfare Transponder 'Connect'/'Multicast Test' Request Packet
+// (total_size = 1+3+1+2+Length+2 = 9+Length)
+Header		UINT8				0xF0
+Counter		UINT24				Packet Counter (default to 0 for connect)
+ID			UINT8				Transponder ID (default to 0 for connect)
+Length		UINT16				Length of DATA array in bytes (4 bytes)
+DATA		UINT8[Length]		Data array (4-byte ChipID)
+CRC			UINT16				DXL2.0 CRC
+
+
+
+
 /// NAN MechWarfare Control System Packet
 // (total_size = 1+3+1+2+2+Length+2 = 11+Length)
 Header		UINT8				0xF5
@@ -55,7 +67,7 @@ State		UINT8				GAME STATE + INSTRUCTION/COMMAND
 //											11 (REQUEST_TRANSPONDER_SETTINGS)
 Time		UINT16				Match Time Remaining in 0.1[s]
 Length		UINT16				Length of DATA array in bytes
-DATA		UINT8[len]			Data array
+DATA		UINT8[Length]		Data array
 CRC			UINT16				DXL2.0 CRC
 
 DATA array types
@@ -97,7 +109,7 @@ Counter		UINT24				Packet Counter (dump if older than last)
 									(each transponder counter initialized to random number by server at setup and tracked by server)
 ID			UINT8				Transponder ID
 Length		UINT16				Length of DATA array in bytes
-DATA		UINT8[len]			Data array
+DATA		UINT8[Length]		Data array
 CRC			UINT16				DXL2.0 CRC
 
 DATA array types
@@ -139,7 +151,7 @@ Counter		UINT24				Packet Counter (dump if older than last)
 									(each transponder counter initialized to random number by server at setup and tracked by server)
 ID			UINT8				Transponder ID
 Length		UINT16				Length of DATA array in bytes
-DATA		UINT8[len]			Data array
+DATA		UINT8[Length]		Data array
 CRC			UINT16				DXL2.0 CRC
 
 
@@ -160,7 +172,7 @@ INST		UINT8				Instruction/Response Type
 									0x02 = Start interpolating to last sent pose
 									0x03 = Interpolate to this pose from current
 									0x0 = 
-DATA		UINT8[len]			Data array
+DATA		UINT8[Length]		Data array
 CRC			UINT16				DXL2.0 CRC
 
 
@@ -176,7 +188,7 @@ ID			UINT8				Transponder ID
 Length		UINT16				Length of DATA array in bytes
 INST		UINT8				Instruction/Response Type
 ERROR		UINT8				Errors
-DATA		UINT8[len]			Data array
+DATA		UINT8[Length]		Data array
 CRC			UINT16				DXL2.0 CRC
 
 
@@ -191,6 +203,8 @@ CRC			UINT16				DXL2.0 CRC
 
 namespace mechwarfare
 {
+#define MWUDP_BUFFER_SIZE				128
+
 	class mwUDP
 	{
 	private:
@@ -211,11 +225,30 @@ namespace mechwarfare
 		uint32_t serverPacketCount;
 		uint32_t transponderPacketCount;
 
+		// Your 8-bit transponder ID number
+		uint8_t transponderID;
+		// ESP8266 chip ID number
+		uint32_t chipID;
+
+		// Game State from Server
+		uint8_t gameState;
+		// Game Time from Server
+		uint16_t gameTime;
+
+		// Transponder State/HP
+		uint16_t myState;
+
+		buffy[MWUDP_BUFFER_SIZE];
+
 	protected:
 		
 	public:
 		
+		uint8_t myID() { return transponderID; }
+		uint8_t globalState() { return gameState; }
+		uint16_t timeLeft() { return gameTime; }
 
+		uint16_t myState() { return myState; }
 	};
 
 

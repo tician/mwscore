@@ -2,37 +2,17 @@
 #include <WiFiUdp.h>
 #include <EEPROM.h>
 #include <Wire.h>
+#include "dynamixel.hpp"
+#include "mw_udp.hpp"
+#include "mw_i2c.hpp"
 
 // MWServer SSID
-char ServerSSID[64] = "MechWarfare";
+char ServerSSID[] = "MechWarfare";
 // MWServer PSWD
-char ServerPSWD[64] = "robotwars";
-
-// MWServer IP
-IPAddress serverIP(192, 168, 49, 13);
-uint16_t serverPort = 0x1105;
-
-// MWServer multicast group IP
-IPAddress mcastIP(192, 168, 49, 14);
-uint16_t mcastPort = 0x1106;
-
-
-//IPAddress transponderIP;
-uint16_t localPort = 0x1105;
-
-
-// Your 8-bit transponder ID number
-uint8_t botID = 0x00;
-
-WiFiUDP mwUDP;
-
-
-uint32_t serverPacketCount = 0;
-uint32_t transponderPacketCount = 0;
+char ServerPSWD[] = "robotwars";
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #define I2C_ENABLED		1
-#define BASE_PANEL_ID	0x42
 
 #define PIN_I2C_SCL		2
 #define PIN_I2C_SDA		0
@@ -43,7 +23,8 @@ uint8_t numPanels = 0;
 
 dynamixel::dxl10 	dxlAX(&Serial, PIN_DXL_TXEN);
 dynamixel::dxl20 	dxlXL(&Serial, PIN_DXL_TXEN);
-
+mechwarfare::mwUDP	MWclient;
+mechwarfare::mwI2C	MWdevices;
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
