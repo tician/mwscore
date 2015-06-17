@@ -49,7 +49,7 @@ CRC			UINT16				DXL2.0 CRC
 
 
 /// NAN MechWarfare Control System Packet
-// (total_size = 1+3+1+2+2+Length+2 = 11+Length)
+// (total_size = 1+3+1+2+ Length +2 = 9+Length) (Length>=2)
 Header		UINT8				0xF5
 Counter		UINT24				Packet Counter (dump if older than last)
 State		UINT8				GAME STATE + INSTRUCTION/COMMAND
@@ -65,9 +65,9 @@ State		UINT8				GAME STATE + INSTRUCTION/COMMAND
 											01 (START_OF_GAME_DATA)
 											10 (TRANSPONDER_SETUP)
 //											11 (REQUEST_TRANSPONDER_SETTINGS)
-Time		UINT16				Match Time Remaining in 0.1[s]
 Length		UINT16				Length of DATA array in bytes
-DATA		UINT8[Length]		Data array
+Time		UINT16				Match Time Remaining in 0.1[s]
+DATA		UINT8[Length-2]		Data array
 CRC			UINT16				DXL2.0 CRC
 
 DATA array types
@@ -145,7 +145,7 @@ DATA array types
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// NAN MechWarfare Transponder Passthrough Packet
-// (total_size = 1+3+1+2+Length+2 = 9+Length)
+// (total_size = 1+3+1+2+Length+2 = 9+Length) (Length>=0)
 Header		UINT8				0xFD
 Counter		UINT24				Packet Counter (dump if older than last)
 									(each transponder counter initialized to random number by server at setup and tracked by server)
@@ -160,7 +160,7 @@ CRC			UINT16				DXL2.0 CRC
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// NAN MechWarfare Transponder Motion Command Packet
-// (total_size = 1+3+1+2+1+Length+2 = 10+Length)
+// (total_size = 1+3+1+2+ Length +2 = 9+Length) (Length>=1)
 Header		UINT8				0xFA
 Counter		UINT24				Packet Counter (dump if older than last)
 									(each transponder counter initialized to random number by server at setup and tracked by server)
@@ -172,7 +172,7 @@ INST		UINT8				Instruction/Response Type
 									0x02 = Start interpolating to last sent pose
 									0x03 = Interpolate to this pose from current
 									0x0 = 
-DATA		UINT8[Length]		Data array
+DATA		UINT8[Length-1]		Data array
 CRC			UINT16				DXL2.0 CRC
 
 
@@ -180,7 +180,7 @@ CRC			UINT16				DXL2.0 CRC
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// NAN MechWarfare Transponder Motion Response Packet
-// (total_size = 1+3+1+2+1+1+Length+2 = 11+Length)
+// (total_size = 1+3+1+2+ Length +2 = 9+Length) (Length>=2)
 Header		UINT8				0xFA
 Counter		UINT24				Packet Counter (dump if older than last)
 									(each transponder counter initialized to random number by server at setup and tracked by server)
@@ -188,7 +188,7 @@ ID			UINT8				Transponder ID
 Length		UINT16				Length of DATA array in bytes
 INST		UINT8				Instruction/Response Type
 ERROR		UINT8				Errors
-DATA		UINT8[Length]		Data array
+DATA		UINT8[Length-2]		Data array
 CRC			UINT16				DXL2.0 CRC
 
 
@@ -203,7 +203,12 @@ CRC			UINT16				DXL2.0 CRC
 
 namespace mechwarfare
 {
-#define MWUDP_BUFFER_SIZE				128
+#define MWUDP_BUFFER_SIZE				160
+
+#define HEADER_CONNECT					0xF0
+#define HEADER_STATUS					0xF5
+#define HEADER_MOTION					0xFA
+#define HEADER_PASSTHRU					0xFD
 
 	class mwUDP
 	{
@@ -213,30 +218,30 @@ namespace mechwarfare
 		WiFiUDP udp;
 
 		// MWServer IP
-		IPAddress serverIP;//(192, 168, 49, 13);
-		uint16_t serverPort;// = 0x1105;
+		IPAddress ServerIP;//(192, 168, 49, 13);
+		uint16_t ServerPort;// = 0x1105;
 
 		// MWServer multicast group IP
-		IPAddress mcastIP;//(192, 168, 49, 14);
-		uint16_t mcastPort;// = 0x1106;
+		IPAddress McastIP;//(192, 168, 49, 14);
+		uint16_t McastPort;// = 0x1106;
 
-		uint16_t localPort;// = 0x1105;
+		uint16_t LocalPort;// = 0x1105;
 
-		uint32_t serverPacketCount;
-		uint32_t transponderPacketCount;
+		uint32_t ServerPacketCount;
+		uint32_t TransponderPacketCount;
 
 		// Your 8-bit transponder ID number
-		uint8_t transponderID;
+		uint8_t TransponderID;
 		// ESP8266 chip ID number
-		uint32_t chipID;
+		uint32_t ChipID;
 
 		// Game State from Server
-		uint8_t gameState;
+		uint8_t GameState;
 		// Game Time from Server
-		uint16_t gameTime;
+		uint16_t GameTime;
 
 		// Transponder State/HP
-		uint16_t myState;
+		uint16_t MyState;
 
 		buffy[MWUDP_BUFFER_SIZE];
 
@@ -244,9 +249,9 @@ namespace mechwarfare
 		
 	public:
 		
-		uint8_t myID() { return transponderID; }
-		uint8_t globalState() { return gameState; }
-		uint16_t timeLeft() { return gameTime; }
+		uint8_t myID() { return TransponderID; }
+		uint8_t globalState() { return GameState; }
+		uint16_t timeLeft() { return GameTime; }
 
 		uint16_t myState() { return myState; }
 	};
