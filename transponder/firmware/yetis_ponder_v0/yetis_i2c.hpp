@@ -50,7 +50,7 @@ YETIS_I2C_UNIVERSALS
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 YETIS_ITB_I2C properties
 	ADDR: NAME
-	0x20: Status
+	0x10: Status
 		Bit-0: (R-) IM_HIT (cleared when READ by master)
 		Bit-1: (-W) OTHER_HIT
 		Bit-2: (-W) HAVE_FLAG
@@ -60,6 +60,8 @@ YETIS_ITB_I2C properties
 		Bit-5: (--) RESERVED for future use
 		Bit-6: (-W) SAVE current settings to EEPROM
 		Bit-7: (-W) REBOOT (to EEPROM defaults using WDReset)
+
+	0x11: Number Hits since last read					(R-) (0x00~0xFF)
 
 Default values grabbed from EEPROM at boot
 	0x21: Hit Duration [ms](L)							(RW) (0x0000~0xFFFF)
@@ -92,7 +94,7 @@ Default values grabbed from EEPROM at boot
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 YETIS_TOPLED_I2C properties
 	ADDR: NAME
-	0x20: Status
+	0x10: Status
 		Bit-0: (--) RESERVED for future use
 		Bit-1: (-W) OTHER_HIT
 		Bit-2: (-W) HAVE_FLAG
@@ -145,7 +147,7 @@ Default values grabbed from EEPROM at boot
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 YETIS_FCB_I2C properties
 	ADDR: NAME
-	0x20: Status
+	0x10: Status
 		Bit-0: (RW) WEAPONS_FREE
 		Bit-1: (R-) OUT_OF_AMMO
 		Bit-2: (-W) FIRE (1[s] burst if PWM only) (1 round if monitored)
@@ -156,9 +158,10 @@ YETIS_FCB_I2C properties
 		Bit-6: (-W) SAVE current settings to EEPROM
 		Bit-7: (-W) REBOOT (to EEPROM defaults using WDReset)
 
+	0x11: Estimated ammo remaining(L)					(RW) (0x0000~0xFFFF)
+	0x12: Estimated ammo remaining(H)					(RW) (0x0000~0xFFFF)
+
 Default values grabbed from EEPROM at boot
-	0x21: Estimated ammo remaining(L)					(RW) (0x0000~0xFFFF)
-	0x22: Estimated ammo remaining(H)					(RW) (0x0000~0xFFFF)
 	0x23: Maximum ammo capacity(L)						(RW) (0x0000~0xFFFF)
 	0x24: Maximum ammo capacity(H)						(RW) (0x0000~0xFFFF)
 	0x25: Fire control PWM value(L)						(RW) (0x0000~0xFFFF)

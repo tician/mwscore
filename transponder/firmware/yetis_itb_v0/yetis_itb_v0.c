@@ -155,7 +155,7 @@ YETIS_I2C_UNIVERSALS
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 YETIS_ITB_I2C properties
 	ADDR: NAME
-	0x20: Status
+	0x10: Status
 		Bit-0: (R-) IM_HIT (cleared when READ by master)
 		Bit-1: (-W) OTHER_HIT
 		Bit-2: (-W) HAVE_FLAG
@@ -166,23 +166,35 @@ YETIS_ITB_I2C properties
 		Bit-6: (-W) SAVE current settings to EEPROM
 		Bit-7: (-W) REBOOT (to EEPROM defaults using WDReset)
 
+	0x11: Number Hits since last read					(R-) (0x00~0xFF)
+
 Default values grabbed from EEPROM at boot
 	0x21: Hit Duration [ms](L)							(RW) (0x0000~0xFFFF)
 	0x22: Hit Duration [ms](H)							(RW) (0x0000~0xFFFF)
 	0x23: Hit Standoff [ms](L)							(RW) (0x0000~0xFFFF)
 	0x24: Hit Standoff [ms](H)							(RW) (0x0000~0xFFFF)
 
-	0x30: Hit LED Value									(RW) (0x00~0x??)
-	0x31: Flag LED Value								(RW) (0x00~0x??)
-	0x32: Capture LED Value								(RW) (0x00~0x??)
+	0x30: FSR Sequential Detections Per Hit				(RW) (1~50)
+	0x31: FSR Threshold									(RW) (50~250)
+	0x32: FSR CALIBRATION MODE ENABLE					(RW) (0~1)
 
-//	0x40: Hit Buzzer Value								(RW) (0x00~0x??)
-//	0x41: Flag Buzzer Value								(RW) (0x00~0x??)
-//	0x42: Capture Buzzer Value							(RW) (0x00~0x??)
+		LED: xSSS xRRR
+			RRR		000	 0.25Hz
+					001	 0.50Hz
+					010	 1.00Hz
+					011	 2.00Hz
+					100	 5.00Hz
+					101	10.00Hz
+			SSS
+					000	alternating
+					001 synchronous
+					010	'flowing' (NONE, CH1, CH1+CH2, CH2, NONE)
+					100 CH1 only
+					101 CH2 only
+	0x40: LED Hit Value									(RW) (0x00~0x??)
+	0x41: LED Flag Value								(RW) (0x00~0x??)
+	0x42: LED Capture Value								(RW) (0x00~0x??)
 
-	0x50: FSR Sequential Detections Per Hit				(RW) (1~50)
-	0x51: FSR Threshold									(RW) (50~250)
-	0x52: FSR CALIBRATION MODE ENABLE					(RW) (0~1)
 
 */
 volatile uint8_t conti_table[] =
