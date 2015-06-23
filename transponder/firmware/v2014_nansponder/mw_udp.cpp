@@ -149,6 +149,8 @@ uint8_t mwUDP::pushTransponderUpdate()
 	udp.write(pak, 11);
 	udp.endPacket();
 	TransponderPacketCount++;
+
+	return ERROR_NONE;
 }
 
 uint8_t mwUDP::handleServerPacket(uint8_t timeout)
@@ -229,7 +231,80 @@ uint8_t mwUDP::handleMulticast()
 	// Extract Data Length
 	packLen = buffy[5] + (buffy[6]<<8);
 
+	// Status Packet
+	if ( buffy[0] == HEADER_STATUS )
+	{
+		GameState = tempByte;
+		// Extract GameTime
+		GameTime = buffy[7] + (buffy[8]<<8);
 
+		if ( (GameState&0x03) == INST_STATUS_UPDATE )
+		{
+			// Check for WeaponState/Powerups/Penalties for ID
+			if ( ((packLen-2)%3) != 0 )
+			{
+				return ERROR_UNEXPECTED_DATA_LENGTH;
+			}
+			tempByte = (packLen - 2)/3;
+			tempShort = 0;
+
+			uint8_t iter;
+			for (iter=0; iter<tempByte; iter++)
+			{
+				// Extract 8-bit transponderID
+				if ( buffy[9+(3*iter)] == TransponderID )
+				{
+					tempShort = (buffy[10+(3*iter)]<<0) + (buffy[11+(3*iter)]<<8);
+					break;
+				}
+			}
+			// Clear WeaponState/Powerups/Penalties
+			MyState &= 0x03FF;
+			// Check for server instituting penalty HP loss
+			if ( (tempShort&0x03FF) < MyState )
+			{
+				MyState = tempShort;
+			}
+			else
+			{
+				MyState |= (tempShort&0xE000);
+			}
+			// Weapons Free?
+			if ( (MyState&0x8000) > 0 )
+			{
+				enableWeapons();
+			}
+			else
+			{
+				disableWeapons();
+			}
+			// Have Flag?
+			if ( (MyState&0x4000) > 0 )
+			{
+				
+			}
+			// Capturing Point?
+			if ( (MyState&0x2000) > 0 )
+			{
+				
+			}
+
+			pushTransponderUpdate();
+
+			return ERROR_NONE;
+		}
+		else
+		{
+			return ERROR_UNEXPECTED_INSTRUCTION;
+		}
+	}
+	else
+	{
+		return ERROR_UNKNOWN_HEADER_TYPE;
+	}
+
+
+	return ERROR_NONE;
 }
 
 uint8_t mwUDP::handleUnicast()
@@ -290,8 +365,7 @@ uint8_t mwUDP::handleUnicast()
 
 		if ( (GameState&0x03) == INST_STATUS_UPDATE )
 		{
-			// Just trigger new update packet to server?
-			// Nope, have to check for WeaponState/Powerups/Penalties for ID
+			// Check for WeaponState/Powerups/Penalties for ID
 		}
 		else if ( (GameState&0x03) == INST_TRANSPONDER_SETUP )
 		{
@@ -328,7 +402,8 @@ uint8_t mwUDP::handleUnicast()
 		else if ( (GameState&0x03) == INST_START_OF_GAME )
 		{
 			// Get Team, HP, etc. of this transponder/bot
-		}else
+		}
+		else
 		{
 			return ERROR_UNEXPECTED_INSTRUCTION;
 		}

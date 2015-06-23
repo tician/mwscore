@@ -120,30 +120,70 @@ I2C Slave
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-#define BASE_PANEL_ID	0x42
 
-uint8_t EEMEM eep_myID = 0;
+uint8_t EEMEM eep_model = 0x01;
+uint8_t EEMEM eep_vhard = 0x00;
+uint8_t EEMEM eep_vfirm = 0x00;
+uint8_t EEMEM eep_myID = 0x01;
+
+uint16_t EEMEM eep_hit_duration = 1000;	// [ms]
+uint16_t EEMEM eep_hit_standoff = 1000; // [ms]
+
+uint8_t EEMEM eep_led_hit = 0x01;		// alternating at 10Hz
+uint8_t EEMEM eep_led_flag = 0x02;		// synchronous at 5Hz
+uint8_t EEMEM eep_led_cap = 0x03;		// 'flowing' at 5Hz
+
 uint8_t EEMEM eep_fsr_sdph = 5;	// Sequential ADC Detections Per Hit
 uint8_t EEMEM eep_fsr_threshold = 230;	// ADC Threshold for Detection
 
+
+
 /*
-MW_ITB_I2C properties
+///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+YETIS_I2C_UNIVERSALS
 	ADDR: NAME
-	0x00: Status register
+	0x00: Model Number								(R-)
+			TARGET PANEL:	0x01
+			TOPLED/BUZZER:	0x02
+			FIRE CONTROL:	0x05
+	0x01: Hardware Revision							(R-)
+	0x02: Firmware Revision							(R-)
+	0x03: ID Number									(RW)
+			TARGET PANEL:	0x00~0x1F
+			TOPLED/BUZZER:	0x20~0x2F
+			FIRE CONTROL:	0x50~0x5F
+///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+YETIS_ITB_I2C properties
+	ADDR: NAME
+	0x20: Status
 		Bit-0: (R-) IM_HIT (cleared when READ by master)
 		Bit-1: (-W) OTHER_HIT
 		Bit-2: (-W) HAVE_FLAG
-		Bit-3: (RW) RESERVED for future use
+		Bit-3: (-W) AM_CAPTURING
 
-		Bit-4: (-W) Save current ID to EEPROM
-		Bit-5: (-W) Save current FSR_SDPH to EEPROM
-		Bit-6: (-W) Save current FSR_THR to EEPROM
-		Bit-7: (-W) RESET (to EEPROM defaults using WDReset)
+		Bit-4: (--) RESERVED for future use
+		Bit-5: (--) RESERVED for future use
+		Bit-6: (-W) SAVE current settings to EEPROM
+		Bit-7: (-W) REBOOT (to EEPROM defaults using WDReset)
 
 Default values grabbed from EEPROM at boot
-	0x01: ID register									(RW) (0x00~0x1F)
-	0x02: FSR Sequential Detections Per Hit register	(RW) (1~50)
-	0x03: FSR Threshold register						(RW) (50~250)
+	0x21: Hit Duration [ms](L)							(RW) (0x0000~0xFFFF)
+	0x22: Hit Duration [ms](H)							(RW) (0x0000~0xFFFF)
+	0x23: Hit Standoff [ms](L)							(RW) (0x0000~0xFFFF)
+	0x24: Hit Standoff [ms](H)							(RW) (0x0000~0xFFFF)
+
+	0x30: Hit LED Value									(RW) (0x00~0x??)
+	0x31: Flag LED Value								(RW) (0x00~0x??)
+	0x32: Capture LED Value								(RW) (0x00~0x??)
+
+//	0x40: Hit Buzzer Value								(RW) (0x00~0x??)
+//	0x41: Flag Buzzer Value								(RW) (0x00~0x??)
+//	0x42: Capture Buzzer Value							(RW) (0x00~0x??)
+
+	0x50: FSR Sequential Detections Per Hit				(RW) (1~50)
+	0x51: FSR Threshold									(RW) (50~250)
+	0x52: FSR CALIBRATION MODE ENABLE					(RW) (0~1)
+
 */
 volatile uint8_t conti_table[] =
 {
