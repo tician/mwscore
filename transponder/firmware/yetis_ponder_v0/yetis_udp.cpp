@@ -3,7 +3,7 @@
 namespace mechwarfare
 {
 
-mwUDP::mwUDP()
+yetisUDP::yetisUDP()
 {
 	ServerIP = {192, 168, 49, 13};
 	ServerPort = 0x1105;
@@ -14,7 +14,7 @@ mwUDP::mwUDP()
 	ChipID = getChipId();
 }
 
-mwUDP::begin()
+yetisUDP::begin()
 {
 //	Serial.println("Starting UDP");
 	udp.begin(LocalPort);
@@ -22,14 +22,14 @@ mwUDP::begin()
 //	Serial.println(udp.localPort());
 }
 
-uint8_t mwUDP::connect(IPAddress ip, uint16_t port)
+uint8_t yetisUDP::connect(IPAddress ip, uint16_t port)
 {
 	ServerIP = ip;
 	ServerPort = port;
 	return connect();
 }
 
-uint8_t mwUDP::connect()
+uint8_t yetisUDP::connect()
 {
 	uint8_t tempByte = 0;
 	uint16_t tempShort = 0;
@@ -124,7 +124,7 @@ uint8_t mwUDP::connect()
 	return ERROR_NONE;
 }
 
-uint8_t mwUDP::pushTransponderUpdate()
+uint8_t yetisUDP::pushTransponderUpdate()
 {
 	uint16_t tempShort = 0;
 	uint8_t pak[11];
@@ -153,7 +153,7 @@ uint8_t mwUDP::pushTransponderUpdate()
 	return ERROR_NONE;
 }
 
-uint8_t mwUDP::handleServerPacket(uint8_t timeout)
+uint8_t yetisUDP::handleServerPacket(uint8_t timeout)
 {
 // Wait for packet or 'timeout'
 	int resp = udp.parsePacket();
@@ -182,10 +182,10 @@ uint8_t mwUDP::handleServerPacket(uint8_t timeout)
 	}
 }
 
-uint8_t mwUDP::handleMulticast()
+uint8_t yetisUDP::handleMulticast()
 {
 	// clear buffer
-	memset(buffy, 0, MWUDP_BUFFER_SIZE);
+	memset(buffy, 0, YETIS_UDP_BUFFER_SIZE);
 
 	uint8_t tempByte = 0;
 	uint16_t tempShort = 0;
@@ -194,7 +194,7 @@ uint8_t mwUDP::handleMulticast()
 	// Grab packet to big buffer
 	int packLen = 0;
 	int fullLen = udp.available();
-	if ( fullLen < MWUDP_BUFFER_SIZE )
+	if ( fullLen < YETIS_UDP_BUFFER_SIZE )
 	{
 		udp.read(buffy, fullLen);
 	}
@@ -307,10 +307,10 @@ uint8_t mwUDP::handleMulticast()
 	return ERROR_NONE;
 }
 
-uint8_t mwUDP::handleUnicast()
+uint8_t yetisUDP::handleUnicast()
 {
 	// clear buffer
-	memset(buffy, 0, MWUDP_BUFFER_SIZE);
+	memset(buffy, 0, YETIS_UDP_BUFFER_SIZE);
 
 	uint8_t tempByte = 0;
 	uint16_t tempShort = 0;
@@ -319,7 +319,7 @@ uint8_t mwUDP::handleUnicast()
 	// Grab packet to big buffer
 	int packLen = 0;
 	int fullLen = udp.available();
-	if ( fullLen < MWUDP_BUFFER_SIZE )
+	if ( fullLen < YETIS_UDP_BUFFER_SIZE )
 	{
 		udp.read(buffy, fullLen);
 	}

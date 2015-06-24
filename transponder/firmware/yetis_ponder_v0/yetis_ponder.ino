@@ -3,8 +3,8 @@
 #include <EEPROM.h>
 #include <Wire.h>
 #include "dynamixel.hpp"
-#include "mw_udp.hpp"
-#include "mw_i2c.hpp"
+#include "yetis_udp.hpp"
+#include "yetis_i2c.hpp"
 
 // MWServer SSID
 char ServerSSID[] = "MechWarfare";
@@ -18,13 +18,10 @@ char ServerPSWD[] = "robotwars";
 #define PIN_I2C_SDA		0
 #define PIN_DXL_TXEN 	15
 
-uint8_t numPanels = 0;
-
-
-dynamixel::dxl10 	dxlAX(&Serial, PIN_DXL_TXEN);
-dynamixel::dxl20 	dxlXL(&Serial, PIN_DXL_TXEN);
-mechwarfare::mwUDP	MWclient;
-mechwarfare::mwI2C	MWdevices;
+dynamixel::dxl10 		dxlAX(&Serial, PIN_DXL_TXEN);
+dynamixel::dxl20 		dxlXL(&Serial, PIN_DXL_TXEN);
+mechwarfare::yetisUDP	MWclient;
+mechwarfare::yetisI2C	MWdevices;
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -52,61 +49,9 @@ void setup()
 
 
 	Serial.println("Starting UDP");
-	mwUDP.begin(localPort);
+	yetisUDP.begin(localPort);
 	Serial.print("Local port: ");
-	Serial.println(mwUDP.localPort());
-
-// Send initial config packet to server
-	uint8_t pak[13] = {	0xF5, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00,	// fixed header/IDs
-						0x00, 0x00, 0x00, 0x00,						// ChipID
-						0x00, 0x00};								// CRC
-	// Get ChipID and send to server
-	uint32_t chipID = getChipId();
-	pak[7]  = (uint8_t) (chipID>>0)&0xFF;
-	pak[8]  = (uint8_t) (chipID>>8)&0xFF;
-	pak[9]  = (uint8_t) (chipID>>16)&0xFF;
-	pak[10] = (uint8_t) (chipID>>24)&0xFF;
-
-	uint16_t tempcrc = dxlXL.crc(pak, 11, 0);
-	pak[11] = (uint8_t) (tempcrc>>0)&0xFF;
-	pak[12] = (uint8_t) (tempcrc>>8)&0xFF;
-
-	mwUDP.beginPacket(serverIP, serverPort);
-	mwUDP.write(pak, 13);
-	mwUDP.endPacket();
-
-
-
-	int resp = mwUDP.parsePacket();
-	while (!resp)
-	{
-		Serial.println("No packet yet...");
-		delay(5);
-		resp = mwUDP.parsePacket();
-	}
-
-
-
-
-
- 
-// Connect to multicast group
-	mwUDP.beginMulticast(WiFi.localIP(), mcastIP, mcastPort);
-
-
-	int resp = mwUDP.parsePacket();
-	if (!resp)
-	{
-		Serial.println("No packet yet...");
-	}
-
-
-
-
-
-
-
-
+	Serial.println(yetisUDP.localPort());
 
 
 // Start up esp8266 EEPROM emulation
@@ -133,25 +78,6 @@ void setup()
 		uint8_t iter;
 		for (iter=1; iter<=12; iter++)
 		{
-/*
-MW_ITB_I2C properties
-	ADDR: NAME
-	0x00: Status register
-		Bit-0: (R-) IM_HIT (cleared when READ by master)
-		Bit-1: (-W) OTHER_HIT
-		Bit-2: (-W) HAVE_FLAG
-		Bit-3: (RW) RESERVED for future use
-
-		Bit-4: (-W) Save current ID to EEPROM
-		Bit-5: (-W) Save current FSR_SDPH to EEPROM
-		Bit-6: (-W) Save current FSR_THR to EEPROM
-		Bit-7: (-W) RESET (to EEPROM defaults using WDReset)
-
-Default values grabbed from EEPROM at boot
-	0x01: ID register									(RW) (0x00~0x1F)
-	0x02: FSR Sequential Detections Per Hit register	(RW) (1~50)
-	0x03: FSR Threshold register						(RW) (50~250)
-*/
 			Wire.beginTransmission(BASE_PANEL_ID+iter);
 			Wire.write(0x00); // Set ADDR of register at which to start next read
 			// Check for existence and operating parameters
@@ -441,21 +367,21 @@ void loop()
 
 
 // Poll wifi for status
-	int resp = mwUDP.parsePacket();
+	int resp = yetisUDP.parsePacket();
 	if (resp>=9)	// minimum valid packet length is 9
 	{
 		uint8_t *buffy = new uint8_t[resp];
 		if (buffy!=NULL)
 		{
 			// Copy to buffer
-			mwUDP.read(buffy, resp);
+			yetisUDP.read(buffy, resp);
 		}
 		else
 		{
 			// Failed to allocate buffer
 			delete[] buffy;
 			// Discard packet
-			mwUDP.flush();
+			yetisUDP.flush();
 		}
 
 		// Handle Status Update

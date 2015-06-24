@@ -36,19 +36,19 @@
 YETIS_I2C_UNIVERSALS
 	ADDR: NAME
 	0x00: Model Number								(R-)
-			TARGET PANEL:	0x01
-			TOPLED/BUZZER:	0x02
-			FIRE CONTROL:	0x05
+			LIGHTS/TARGET BOARD:	0x01
+			LIGHTS/SOUNDS BOARD:	0x02
+			FIRE CONTROL BOARD:		0x05
 	0x01: Hardware Revision							(R-)
 	0x02: Firmware Revision							(R-)
 	0x03: ID Number									(RW)
-			TARGET PANEL:	0x00~0x1F
-			TOPLED/BUZZER:	0x20~0x2F
-			FIRE CONTROL:	0x50~0x5F
+			LIGHTS/TARGET BOARD:	0x00~0x1F
+			LIGHTS/SOUNDS BOARD:	0x20~0x2F
+			FIRE CONTROL BOARD:		0x50~0x5F
 			
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-YETIS_ITB_I2C properties
+YETIS_LTB_I2C properties
 	ADDR: NAME
 	0x10: Status
 		Bit-0: (R-) IM_HIT (cleared when READ by master)
@@ -64,10 +64,10 @@ YETIS_ITB_I2C properties
 	0x11: Number Hits since last read					(R-) (0x00~0xFF)
 
 Default values grabbed from EEPROM at boot
-	0x21: Hit Duration [ms](L)							(RW) (0x0000~0xFFFF)
-	0x22: Hit Duration [ms](H)							(RW) (0x0000~0xFFFF)
-	0x23: Hit Standoff [ms](L)							(RW) (0x0000~0xFFFF)
-	0x24: Hit Standoff [ms](H)							(RW) (0x0000~0xFFFF)
+	0x20: Hit Duration [ms](L)							(RW) (0x0000~0xFFFF)
+	0x21: Hit Duration [ms](H)							(RW) (0x0000~0xFFFF)
+	0x22: Hit Standoff [ms](L)							(RW) (0x0000~0xFFFF)
+	0x23: Hit Standoff [ms](H)							(RW) (0x0000~0xFFFF)
 
 	0x30: FSR Sequential Detections Per Hit				(RW) (1~50)
 	0x31: FSR Threshold									(RW) (50~250)
@@ -92,7 +92,7 @@ Default values grabbed from EEPROM at boot
 
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-YETIS_TOPLED_I2C properties
+YETIS_LSB_I2C properties
 	ADDR: NAME
 	0x10: Status
 		Bit-0: (--) RESERVED for future use
@@ -105,9 +105,11 @@ YETIS_TOPLED_I2C properties
 		Bit-6: (-W) SAVE current settings to EEPROM
 		Bit-7: (-W) REBOOT (to EEPROM defaults using WDReset)
 
+	0x11: 												(--) (0x??)
+
 Default values grabbed from EEPROM at boot
-	0x21: Hit Duration [ms](L)							(RW) (0x0000~0xFFFF)
-	0x22: Hit Duration [ms](H)							(RW) (0x0000~0xFFFF)
+	0x20: Hit Duration [ms](L)							(RW) (0x0000~0xFFFF)
+	0x21: Hit Duration [ms](H)							(RW) (0x0000~0xFFFF)
 
 		LED: xSSS xRRR
 			RRR		000	 0.25Hz
@@ -162,27 +164,60 @@ YETIS_FCB_I2C properties
 	0x12: Estimated ammo remaining(H)					(RW) (0x0000~0xFFFF)
 
 Default values grabbed from EEPROM at boot
-	0x23: Maximum ammo capacity(L)						(RW) (0x0000~0xFFFF)
-	0x24: Maximum ammo capacity(H)						(RW) (0x0000~0xFFFF)
-	0x25: Fire control PWM value(L)						(RW) (0x0000~0xFFFF)
-	0x26: Fire control PWM value(H)						(RW) (0x0000~0xFFFF)
-	0x27: Fire standoff [ms](L)							(RW) (0x0000~0xFFFF)
-	0x28: Fire standoff [ms](H)							(RW) (0x0000~0xFFFF)
+	0x20: Maximum ammo capacity(L)						(RW) (0x0000~0xFFFF)
+	0x21: Maximum ammo capacity(H)						(RW) (0x0000~0xFFFF)
+	0x22: Fire control PWM value(L)						(RW) (0x0000~0xFFFF)
+	0x23: Fire control PWM value(H)						(RW) (0x0000~0xFFFF)
+	0x24: Fire standoff [ms](L)							(RW) (0x0000~0xFFFF)
+	0x25: Fire standoff [ms](H)							(RW) (0x0000~0xFFFF)
 
 */
 
 
-#ifndef _NAN_MW_I2C_H_
-#define _NAN_MW_I2C_H_
+#ifndef _YETIS_MW_I2C_H_
+#define _YETIS_MW_I2C_H_
 
 #include <Wire.h>
 
+#define YETIS_MIN_VHARD_LTB		0
+#define YETIS_MIN_VHARD_LSB		0
+#define YETIS_MIN_VHARD_FCB		0
+
+#define YETIS_MIN_VFIRM_LTB		0
+#define YETIS_MIN_VFIRM_LSB		0
+#define YETIS_MIN_VFIRM_FCB		0
+
 namespace mechwarfare
 {
-	class mwI2C
+	class yetisI2C
 	{
 	private:
-		
+		pin pin_i2c_sda, pin_i2c_scl;
+
+		enum
+		{
+			YETIS_MODEL_LTB			= 0x01,
+			YETIS_MODEL_LSB			= 0x02,
+			YETIS_MODEL_FCB			= 0x05
+		};
+
+		enum
+		{
+			YETIS_MIN_ID_LTB		= 0x00,
+			YETIS_MAX_ID_LTB		= 0x1F,
+			YETIS_MIN_ID_LSB		= 0x20,
+			YETIS_MAX_ID_LSB		= 0x2F,
+			YETIS_MIN_ID_FCB		= 0x50,
+			YETIS_MAX_ID_FCB		= 0x5F
+		};
+
+		uint8_t idsLTB[YETIS_MAX_ID_LTB-YETIS_MIN_ID_LTB];
+		uint8_t numLTB;
+		uint8_t idsLSB[YETIS_MAX_ID_LSB-YETIS_MIN_ID_LSB];
+		uint8_t numLSB;
+		uint8_t idsFCB[YETIS_MAX_ID_FCB-YETIS_MIN_ID_FCB];
+		uint8_t numFCB;
+
 	protected:
 		
 	public:
@@ -197,4 +232,4 @@ namespace mechwarfare
 
 }//namespace mechwarfare
 
-#endif //_NAN_MW_I2C_H_
+#endif //_YETIS_MW_I2C_H_

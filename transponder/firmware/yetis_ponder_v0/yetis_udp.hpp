@@ -1,6 +1,6 @@
 /*
  *******************************************************************************
- * MechWarfare UDP Interface for ESP8266 NaNsponder
+ * YETIS MechWarfare - UDP Interface for ESP8266 YETIS-ponder
  *******************************************************************************
  * Copyright (c) 2015, Matthew Paulishen.
  * All rights reserved.
@@ -36,7 +36,7 @@
 /// ALL TRANSMISSIONS LITTLE-ENDIAN
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// NAN MechWarfare Transponder 'Connect'/'Multicast Test' Request Packet
+/// YETIS MechWarfare Transponder 'Connect'/'Multicast Test' Request Packet
 // (total_size = 1+3+1+2+Length+2 = 9+Length)
 Header		UINT8				0xF0
 Counter		UINT24				Packet Counter (default to 0 for connect)
@@ -48,7 +48,7 @@ CRC			UINT16				DXL2.0 CRC
 
 
 
-/// NAN MechWarfare Control System Packet
+/// YETIS MechWarfare Control System Packet
 // (total_size = 1+3+1+2+ Length +2 = 9+Length) (Length>=2)
 Header		UINT8				0xF5
 Counter		UINT24				Packet Counter (dump if older than last)
@@ -102,7 +102,7 @@ DATA array types
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// NAN MechWarfare Transponder Response Packet
+/// YETIS MechWarfare Transponder Response Packet
 // (total_size = 1+3+1+2+Length+2 = 9+Length)
 Header		UINT8				0xF5
 Counter		UINT24				Packet Counter (dump if older than last)
@@ -144,7 +144,7 @@ DATA array types
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// NAN MechWarfare Transponder Passthrough Packet
+/// YETIS MechWarfare Transponder Passthrough Packet
 // (total_size = 1+3+1+2+Length+2 = 9+Length) (Length>=0)
 Header		UINT8				0xFD
 Counter		UINT24				Packet Counter (dump if older than last)
@@ -159,7 +159,7 @@ CRC			UINT16				DXL2.0 CRC
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// NAN MechWarfare Transponder Motion Command Packet
+/// YETIS MechWarfare Transponder Motion Command Packet
 // (total_size = 1+3+1+2+ Length +2 = 9+Length) (Length>=1)
 Header		UINT8				0xFA
 Counter		UINT24				Packet Counter (dump if older than last)
@@ -179,7 +179,7 @@ CRC			UINT16				DXL2.0 CRC
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-/// NAN MechWarfare Transponder Motion Response Packet
+/// YETIS MechWarfare Transponder Motion Response Packet
 // (total_size = 1+3+1+2+ Length +2 = 9+Length) (Length>=2)
 Header		UINT8				0xFA
 Counter		UINT24				Packet Counter (dump if older than last)
@@ -195,22 +195,22 @@ CRC			UINT16				DXL2.0 CRC
 */
 
 
-#ifndef _NAN_MW_UDP_H_
-#define _NAN_MW_UDP_H_
+#ifndef _YETIS_MW_UDP_H_
+#define _YETIS_MW_UDP_H_
 
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 
 namespace mechwarfare
 {
-#define MWUDP_BUFFER_SIZE				160
+#define YETIS_UDP_BUFFER_SIZE			160
 
 #define HEADER_CONNECT					0xF0
 #define HEADER_STATUS					0xF5
 #define HEADER_MOTION					0xFA
 #define HEADER_PASSTHRU					0xFD
 
-	class mwUDP
+	class yetisUDP
 	{
 	private:
 		dynamixel::crc	checker;
@@ -243,7 +243,7 @@ namespace mechwarfare
 		// Transponder State/HP
 		uint16_t MyState;
 
-		buffy[MWUDP_BUFFER_SIZE];
+		buffy[YETIS_UDP_BUFFER_SIZE];
 
 	protected:
 		
@@ -263,4 +263,4 @@ namespace mechwarfare
 
 }//namespace mechwarfare
 
-#endif //_NAN_MW_UDP_H_
+#endif //_YETIS_MW_UDP_H_
