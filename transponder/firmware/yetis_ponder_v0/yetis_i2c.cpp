@@ -128,109 +128,101 @@ void yetisI2C::search(void)
 }
 
 
-void yetisI2C::configure(uint8_t ***configs, uint8_t num)
+void yetisI2C::configure(uint8_t model, uint8_t **configs, uint8_t nConfigs)
 {
 /*
 	configs
-		[devConDat0]...[devConDatN]
-		devConDat
-			[nConf][model][conDat*]...[conDat*]
-			conDat
-				[addr][len][data0]...[dataN]
+		[(uint8_t*)conDat0]...[(uint8_t*)conDatN]
+		conDat
+			[(uint8_t)addr][(uint8_t)len][(uint8_t)data0]...[(uint8_t)dataN]
 */
-	uint8_t iter, jter, kter;
+	uint8_t iter, jter;
 
-	for (iter=0; iter<num; iter++)
+	if (model == YETIS_MODEL_LTB)
 	{
-		// [addr][len][data0]...[dataN]
-		uint8_t **devConDat = configs[iter];
-		uint8_t nConf = (uint8_t) devConDat[0];
-		uint8_t model = (uint8_t) devConDat[1];
-
-		if (model == YETIS_MODEL_LTB)
+		// Configure I2C Lights/Target Boards
+		for (iter=0; iter<numLTB; iter++)
 		{
-			// Configure I2C Lights/Target Boards
-			for (jter=0; jter<numLTB; jter++)
+			for (jter=0; jter<nConfigs; jter++)
 			{
-				for (kter=0; kter<nConf; kter++)
-				{
-					uint8_t *conDat = devConDat[2+kter];
-					uint8_t addr = conDat[0];
-					uint8_t len = conDat[1];
+				uint8_t *conDat = configs[iter];
+				// [addr][len][data0]...[dataN]
+				uint8_t addr = conDat[0];
+				uint8_t len = conDat[1];
 
-					Wire.beginTransmission(idsLTB[jter]);
-					// Set ADDR of register at which to start next WRITE
-					Wire.write( addr );
-					Wire.write( (conDat+2), len );
-
-					Wire.endTrasmission();
-				}
-
-				Wire.beginTransmission(idsLTB[jter]);
+				Wire.beginTransmission(idsLTB[iter]);
 				// Set ADDR of register at which to start next WRITE
-				Wire.write( 0x10 );
-				Wire.write( WRITE_TO_EEPROM );
+				Wire.write( addr );
+				Wire.write( (conDat+2), len );
+
 				Wire.endTrasmission();
 			}
-		}
-		else if (model == YETIS_MODEL_LSB)
-		{
-			// Configure I2C Lights/Sounds Boards
-			for (jter=0; jter<numLSB; jter++)
-			{
-				for (kter=0; kter<nConf; kter++)
-				{
-					uint8_t *conDat = devConDat[2+kter];
-					uint8_t addr = conDat[0];
-					uint8_t len = conDat[1];
 
-					Wire.beginTransmission(idsLSB[jter]);
-					// Set ADDR of register at which to start next WRITE
-					Wire.write( addr );
-					Wire.write( (conDat+2), len );
-
-					Wire.endTrasmission();
-				}
-
-				Wire.beginTransmission(idsLSB[jter]);
-				// Set ADDR of register at which to start next WRITE
-				Wire.write( 0x10 );
-				Wire.write( WRITE_TO_EEPROM );
-				Wire.endTrasmission();
-			}
-		}
-		else if (model == YETIS_MODEL_FCB)
-		{
-			// Configure I2C Fire Control Boards
-			for (jter=0; jter<numFCB; jter++)
-			{
-				for (kter=0; kter<nConf; kter++)
-				{
-					uint8_t *conDat = devConDat[2+kter];
-					uint8_t addr = conDat[0];
-					uint8_t len = conDat[1];
-
-					Wire.beginTransmission(idsFCB[jter]);
-					// Set ADDR of register at which to start next WRITE
-					Wire.write( addr );
-					Wire.write( (conDat+2), len );
-
-					Wire.endTrasmission();
-				}
-
-				Wire.beginTransmission(idsFCB[jter]);
-				// Set ADDR of register at which to start next WRITE
-				Wire.write( 0x10 );
-				Wire.write( WRITE_TO_EEPROM );
-				Wire.endTrasmission();
-			}
-		}
-		else
-		{
-			// unsupported model
+			Wire.beginTransmission(idsLTB[iter]);
+			// Set ADDR of register at which to start next WRITE
+			Wire.write( 0x10 );
+			Wire.write( WRITE_TO_EEPROM );
+			Wire.endTrasmission();
 		}
 	}
-	return 0;
+	else if (model == YETIS_MODEL_LSB)
+	{
+		// Configure I2C Lights/Sounds Boards
+		for (iter=0; iter<numLSB; iter++)
+		{
+			for (jter=0; jter<nConfigs; jter++)
+			{
+				uint8_t *conDat = configs[iter];
+				// [addr][len][data0]...[dataN]
+				uint8_t addr = conDat[0];
+				uint8_t len = conDat[1];
+
+				Wire.beginTransmission(idsLSB[iter]);
+				// Set ADDR of register at which to start next WRITE
+				Wire.write( addr );
+				Wire.write( (conDat+2), len );
+
+				Wire.endTrasmission();
+			}
+
+			Wire.beginTransmission(idsLSB[iter]);
+			// Set ADDR of register at which to start next WRITE
+			Wire.write( 0x10 );
+			Wire.write( WRITE_TO_EEPROM );
+			Wire.endTrasmission();
+		}
+	}
+	else if (model == YETIS_MODEL_FCB)
+	{
+		// Configure I2C Fire Control Boards
+		for (iter=0; iter<numFCB; iter++)
+		{
+			for (jter=0; jter<nConfigs; jter++)
+			{
+				uint8_t *conDat = configs[iter];
+				// [addr][len][data0]...[dataN]
+				uint8_t addr = conDat[0];
+				uint8_t len = conDat[1];
+
+				Wire.beginTransmission(idsFCB[iter]);
+				// Set ADDR of register at which to start next WRITE
+				Wire.write( addr );
+				Wire.write( (conDat+2), len );
+
+				Wire.endTrasmission();
+			}
+
+			Wire.beginTransmission(idsFCB[iter]);
+			// Set ADDR of register at which to start next WRITE
+			Wire.write( 0x10 );
+			Wire.write( WRITE_TO_EEPROM );
+			Wire.endTrasmission();
+		}
+	}
+	else
+	{
+		// unsupported model
+	}
 }
 
 uint16_t yetisI2C::process(uint8_t bussStatus)
