@@ -45,7 +45,6 @@ YETIS_I2C_UNIVERSALS
 			LIGHTS/TARGET BOARD:	0x00~0x1F
 			LIGHTS/SOUNDS BOARD:	0x20~0x2F
 			FIRE CONTROL BOARD:		0x50~0x5F
-			
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 YETIS_LTB_I2C properties
@@ -61,34 +60,45 @@ YETIS_LTB_I2C properties
 		Bit-6: (-W) SAVE current settings to EEPROM
 		Bit-7: (-W) REBOOT (to EEPROM defaults using WDReset)
 
-	0x11: Number Hits since last read					(R-) (0x00~0xFF)
+	0x11: Damage since last reboot(L)					(R-) (0x0000~0xFFFF)
+	0x12: Damage since last reboot(H)					(R-) (0x0000~0xFFFF)
 
 Default values grabbed from EEPROM at boot
 	0x20: Hit Duration [ms](L)							(RW) (0x0000~0xFFFF)
 	0x21: Hit Duration [ms](H)							(RW) (0x0000~0xFFFF)
 	0x22: Hit Standoff [ms](L)							(RW) (0x0000~0xFFFF)
 	0x23: Hit Standoff [ms](H)							(RW) (0x0000~0xFFFF)
+	0x24: Damage-Per-Hit Value							(RW) (0x00~0xFF)
 
 	0x30: FSR Sequential Detections Per Hit				(RW) (1~50)
 	0x31: FSR Threshold									(RW) (50~250)
 	0x32: FSR CALIBRATION MODE ENABLE					(RW) (0~1)
 
-		LED: xSSS xRRR
-			RRR		000	 0.25Hz
-					001	 0.50Hz
-					010	 1.00Hz
-					011	 2.00Hz
-					100	 5.00Hz
-					101	10.00Hz
+		LED: xSSS FRRR
+			F
+					1	FORCE_ACTIVE
+			RRR
+					000	FREQ_00_000Hz
+					001	FREQ_00_125Hz
+					010	FREQ_00_250Hz
+					011	FREQ_00_500Hz
+					100	FREQ_01_000Hz
+					101	FREQ_02_000Hz
+					110	FREQ_05_000Hz
+					111	FREQ_10_000Hz
 			SSS
-					000	alternating
-					001 synchronous
-					010	'flowing' (NONE, CH1, CH1+CH2, CH2, NONE)
-					100 CH1 only
-					101 CH2 only
-	0x40: LED Hit Value									(RW) (0x00~0x??)
-	0x41: LED Flag Value								(RW) (0x00~0x??)
-	0x42: LED Capture Value								(RW) (0x00~0x??)
+					000	ALTERNATING
+					001	SYNCHRONOUS
+					010	FLOWING (NONE, CH1, CH1+CH2, CH2, NONE)
+					011	CH1_ONLY
+					100	CH2_ONLY
+					101	CH1_SOLID + CH2_FLASHING
+					110	CH1_FLASHING + CH2_SOLID
+	0x40: LED State										(RW) (0x00~0xFF)
+	0x41: LED IM_HIT Value								(RW) (0x00~0xFF)
+	0x42: LED OTHER_HIT Value							(RW) (0x00~0xFF)
+	0x43: LED HAVE_FLAG Value							(RW) (0x00~0xFF)
+	0x44: LED AM_CAPTURING Value						(RW) (0x00~0xFF)
 
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -111,40 +121,57 @@ Default values grabbed from EEPROM at boot
 	0x20: Hit Duration [ms](L)							(RW) (0x0000~0xFFFF)
 	0x21: Hit Duration [ms](H)							(RW) (0x0000~0xFFFF)
 
-		LED: xSSS xRRR
-			RRR		000	 0.25Hz
-					001	 0.50Hz
-					010	 1.00Hz
-					011	 2.00Hz
-					100	 5.00Hz
-					101	10.00Hz
+		LED: xSSS FRRR
+			F
+					1	FORCE_ACTIVE
+			RRR
+					000	FREQ_00_000Hz
+					001	FREQ_00_125Hz
+					010	FREQ_00_250Hz
+					011	FREQ_00_500Hz
+					100	FREQ_01_000Hz
+					101	FREQ_02_000Hz
+					110	FREQ_05_000Hz
+					111	FREQ_10_000Hz
 			SSS
-					000	alternating
-					001 synchronous
-					010	'flowing'
-					100 CH1 only
-					101 CH2 only
-	0x40: LED Hit Value									(RW) (0x00~0x??)
-	0x41: LED Flag Value								(RW) (0x00~0x??)
-	0x42: LED Capture Value								(RW) (0x00~0x??)
+					000	ALTERNATING
+					001	SYNCHRONOUS
+					010	FLOWING (NONE, CH1, CH1+CH2, CH2, NONE)
+					011	CH1_ONLY
+					100	CH2_ONLY
+					101	CH1_SOLID + CH2_FLASHING
+					110	CH1_FLASHING + CH2_SOLID
+	0x40: LED State										(RW) (0x00~0xFF)
+	0x41: LED IM_HIT Value								(RW) (0x00~0xFF)
+	0x42: LED OTHER_HIT Value							(RW) (0x00~0xFF)
+	0x43: LED HAVE_FLAG Value							(RW) (0x00~0xFF)
+	0x44: LED AM_CAPTURING Value						(RW) (0x00~0xFF)
 
-		BUZZER: xSSS xRRR
-			RRR		000	 0.25Hz
-					001	 0.50Hz
-					010	 1.00Hz
-					011	 2.00Hz
-					100	 5.00Hz
-					101	10.00Hz
+		BUZZER: xSSS FRRR
+			F
+					1	FORCE_ACTIVE
+			RRR
+					000	FREQ_00_000Hz
+					001	FREQ_00_125Hz
+					010	FREQ_00_250Hz
+					011	FREQ_00_500Hz
+					100	FREQ_01_000Hz
+					101	FREQ_02_000Hz
+					110	FREQ_05_000Hz
+					111	FREQ_10_000Hz
 			SSS
-					000	chirp high
-					001 chirp low
-					010	two-tone / ping-pong / warble
-					011 WAH-wah-waaaah
-					100 rising
-					101 falling
-	0x50: Buzzer Hit Value								(RW) (0x00~0x??)
-	0x51: Buzzer Flag Value								(RW) (0x00~0x??)
-	0x52: Buzzer Capture Value							(RW) (0x00~0x??)
+					000	BEEP_LOW
+					001	BEEP_MID
+					010	BEEP_HIGH
+					011	WARBLE
+					100	WAHWAHWAH
+					101	RISING
+					110	FALLING
+	0x50: Buzzer State									(RW) (0x00~0xFF)
+	0x51: Buzzer IM_HIT Value							(RW) (0x00~0xFF)
+	0x52: Buzzer OTHER_HIT Value						(RW) (0x00~0xFF)
+	0x53: Buzzer HAVE_FLAG Value						(RW) (0x00~0xFF)
+	0x54: Buzzer AM_CAPTURING Value						(RW) (0x00~0xFF)
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 YETIS_FCB_I2C properties
@@ -152,7 +179,7 @@ YETIS_FCB_I2C properties
 	0x10: Status
 		Bit-0: (RW) WEAPONS_FREE
 		Bit-1: (R-) OUT_OF_AMMO
-		Bit-2: (-W) FIRE (1[s] burst if PWM only) (1 round if monitored)
+		Bit-2: (-W) FIRE_ONCE (1[s] burst if PWM only) (1 round if monitored)
 		Bit-3: (RW) LASER_SIGHT_ENABLED
 
 		Bit-4: (--) RESERVED for future use
@@ -160,8 +187,8 @@ YETIS_FCB_I2C properties
 		Bit-6: (-W) SAVE current settings to EEPROM
 		Bit-7: (-W) REBOOT (to EEPROM defaults using WDReset)
 
-	0x11: Estimated ammo remaining(L)					(RW) (0x0000~0xFFFF)
-	0x12: Estimated ammo remaining(H)					(RW) (0x0000~0xFFFF)
+	0x11: Estimated rounds/seconds ammo remaining(L)	(RW) (0x0000~0xFFFF)
+	0x12: Estimated rounds/seconds ammo remaining(H)	(RW) (0x0000~0xFFFF)
 
 Default values grabbed from EEPROM at boot
 	0x20: Maximum ammo capacity(L)						(RW) (0x0000~0xFFFF)
@@ -191,16 +218,13 @@ namespace mechwarfare
 {
 	class yetisI2C
 	{
-	private:
-		pin pin_i2c_sda, pin_i2c_scl;
-
+	public:
 		enum
 		{
 			YETIS_MODEL_LTB			= 0x01,
 			YETIS_MODEL_LSB			= 0x02,
 			YETIS_MODEL_FCB			= 0x05
 		};
-
 		enum
 		{
 			YETIS_MIN_ID_LTB		= 0x00,
@@ -210,7 +234,59 @@ namespace mechwarfare
 			YETIS_MIN_ID_FCB		= 0x50,
 			YETIS_MAX_ID_FCB		= 0x5F
 		};
+		enum
+		{
+			SAVE_TO_EEPROM			= (1<<6),
+			REBOOT					= (1<<7)
+		};
+		enum
+		{
+			IM_HIT					= (1<<0),
+			OTHER_HIT				= (1<<1),
+			HAVE_FLAG				= (1<<2),
+			AM_CAPTURING			= (1<<3)
+		};
+		enum
+		{
+			WEAPONS_FREE			= (1<<0),
+			OUT_OF_AMMO				= (1<<1),
+			FIRE_ONCE				= (1<<2),
+			LASER_SIGHT_ENABLED		= (1<<3)
+		};
+		enum
+		{
+			FREQ_00_000Hz			= 0x00,
+			FREQ_00_125Hz			= 0x01,
+			FREQ_00_250Hz			= 0x02,
+			FREQ_00_500Hz			= 0x03,
+			FREQ_01_000Hz			= 0x04,
+			FREQ_02_000Hz			= 0x05,
+			FREQ_05_000Hz			= 0x06,
+			FREQ_10_000Hz			= 0x07,
+			FORCE_ACTIVE			= 0x08
+		};
+		enum
+		{
+			LEDS_ALTERNATING		= 0x00,
+			LEDS_SYNCHRONOUS		= 0x10,
+			LEDS_FLOWING			= 0x20,
+			LEDS_CH1				= 0x30,
+			LEDS_CH2				= 0x40,
+			LEDS_CH1S_CH2F			= 0x50,
+			LEDS_CH1F_CH2S			= 0x60
+		};
+		enum
+		{
+			BUZZ_BEEP_LOW			= 0x00,
+			BUZZ_BEEP_MID			= 0x10,
+			BUZZ_BEEP_HIGH			= 0x20,
+			BUZZ_WARBLE				= 0x30,
+			BUZZ_WAHWAHWAH			= 0x40,
+			BUZZ_RISING				= 0x50,
+			BUZZ_FALLING			= 0x60
+		};
 
+	private:
 		uint8_t idsLTB[YETIS_MAX_ID_LTB-YETIS_MIN_ID_LTB];
 		uint8_t numLTB;
 		uint8_t idsLSB[YETIS_MAX_ID_LSB-YETIS_MIN_ID_LSB];
@@ -221,7 +297,14 @@ namespace mechwarfare
 	protected:
 		
 	public:
-		
+		yetisI2C(int sda, int scl);
+		void search(void);
+		void configure(uint8_t model, uint8_t **configs, uint8_t nConfigs);
+		uint16_t process(uint8_t bussStatus);
+		bool weaponsFree(bool guns, bool laser);
+		uint16_t fire(uint8_t weapon_number);
+
+
 	};
 
 

@@ -18,7 +18,7 @@
  *******************************************************************************
  */
 
-// sudo avrdude -c usbasp -P USB -p t13 -v -U flash:w:./mw_itb_dig.hex
+// sudo avrdude -c usbasp -P USB -p t85 -v -U flash:w:./yetis_itb_v0.hex
 
 
 #include <stdint.h>
@@ -27,10 +27,7 @@
 #include <avr/io.h>
 #include <avr/eeprom.h>
 
-#if defined(__ATtiny13A__)
-#define I2C_ENABLED		0
-
-#elif defined(__ATtiny25__) | defined(__ATtiny45__) | defined(__ATtiny85__)
+#if defined(__ATtiny25__) | defined(__ATtiny45__) | defined(__ATtiny85__)
 #define I2C_ENABLED		1
 #include "usiTwiSlave.h"
 
@@ -38,13 +35,42 @@
 #error 'INVALID DEVICE'
 #endif
 
+#ifndef YETIS_MODEL
+#define YETIS_MODEL					0x01
+#endif
+#ifndef YETIS_HARDWARE_REVISION
+#define YETIS_HARDWARE_REVISION		0
+#endif
+#ifndef YETIS_FIRMWARE_REVISION
+#define YETIS_FIRMWARE_REVISION 	0
+#endif
+
 /*
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/// PIN DEFINITIONS
+/// PIN DEFINITIONS (LSB)
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	PB0 - I/O - SDA												DIP-P5	MOSI
 	PB1 - OUT - LED2 -	Pin : 62[Ohm] : [>] : [>] : GND			DIP-P6	MISO
-	PB2 - I/O - DATA/SCL										DIP-P7	SCK
+	PB2 - I/O - SCL												DIP-P7	SCK
+	PB3 - OUT - BUZZER											DIP-P2
+	PB4 - OUT - LED1 -	Pin : 62[Ohm] : [>] : [>] : GND			DIP-P3
+	PB5 - N/A - RESET											DIP-P1	!RESET
+///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#define LED1_OFF()	{PORTB &=~(1<<PIN4);}
+#define LED1_ON()	{PORTB |= (1<<PIN4);}
+#define LED2_OFF()	{PORTB &=~(1<<PIN1);}
+#define LED2_ON()	{PORTB |= (1<<PIN1);}
+#define BUZZ_OFF()	{PORTB &=~(1<<PIN3);}
+#define BUZZ_ON()	{PORTB |= (1<<PIN3);}
+*/
+
+/*
+///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/// PIN DEFINITIONS (LTB)
+///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	PB0 - I/O - SDA												DIP-P5	MOSI
+	PB1 - OUT - LED2 -	Pin : 62[Ohm] : [>] : [>] : GND			DIP-P6	MISO
+	PB2 - I/O - SCL												DIP-P7	SCK
 	PB3 - ADC - BUTTON/SENSE (ADC3)								DIP-P2
 	PB4 - OUT - LED1 -	Pin : 62[Ohm] : [>] : [>] : GND			DIP-P3
 	PB5 - N/A - RESET											DIP-P1	!RESET
@@ -54,61 +80,24 @@
 #define LED1_ON()	{PORTB |= (1<<PIN4);}
 #define LED2_OFF()	{PORTB &=~(1<<PIN1);}
 #define LED2_ON()	{PORTB |= (1<<PIN1);}
-#define DATA_IN()	{DDRB &= ~(1<<PIN2); PORTB |= (1<<PIN2);}
-#define DATA_CHK()	{(PINB&(1<<PIN2));}
-#define DATA_HIT()	{DDRB |= (1<<PIN2); PORTB &= ~(1<<PIN2);}
-
 
 /*
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/// Universal functionality
+/// Calibration Mode
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 All FSRs are connected in parallel to SENSE/ADC3 with a 10k external pull-up
 Pull RESET low to reboot at any time; will clear all settings not saved to EEPROM.
-Pull SENSE low for ~5 seconds during reset/boot to enter configuration mode.
 
-  Configuration Mode (LED1 flashing ~5Hz until SENSE released):
-    To set ID, pull SENSE low N times until LED1 on, LED2 off.
-    To set Threshold, pull SENSE low N times until LED1 off, LED2 on.
-    To set SDPH, pull SENSE low N times until LED1 on, LED2 on.
-    Wait ~3 seconds until board enters selected mode.
-
-
-    Set 'ID' (LED1 off; LED2 pulsing on 1~12 times, then off 1s):
-      When LED2 pulses N==ID, pull SENSE low until LED1 on and LED2 off
-      Release SENSE and LED1 will pulse the newly set ID with LED2 on solid
-      LED2 flashing and LED1 on solid for 5s
-        If pull SENSE low ~1s, LED1 off and new ID will be saved to EEPROM
-
-    Set 'Sequential Detections Per Hit' (LED1 on; LED2 pulsing on 1~12 times, then off 1s):
-      When LED2 pulses N==SDPH, pull SENSE low until LED1 off and LED2 on
-      Release SENSE and LED1 will pulse the newly set SDPH with LED2 on solid
-      LED2 flashing and LED1 on solid for 5s
-        If pull SENSE low ~1s, LED1 off and new SDPH will be saved to EEPROM
-
-
-    Set 'Detection Threshold' (LED1 on; LED2 flashing at ~5HZ)
-      Shoot target panel as many times as desired.
-      Board will save 20 biggest impacts
-      Pull SENSE low for ~2s to find arithmetic mean of those 20 hits,
-        then set Threshold to (arithmetic mean + 10) and save to EEPROM.
+	Write FSR_CALIBRATION_MODE_ENABLE = 1
+		(LED1 on; LED2 flashing at ~5Hz)
+		Shoot target panel as many times as desired.
+			Board will save 20 biggest impacts
+	Write FSR_CALIBRATION_MODE_ENABLE = 0
+	Test out new value
+	Write to EEPROM?
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-
-/*
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/// No USI for I2C
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-DATA is input most of the time.
-  If Transponder wants panel active, lets DATA stay pulled high by pull-up
-    If DATA is Input and pulled high by pull-up, check FSRs for hits
-  If Transponder wants panel flashing, pulls DATA low
-    If DATA is Input and pulled low by transponder, start flashing LEDs
-  If detect hit, panel pulls DATA low for (ID*0.1)[s] and flashes LEDs for ~1s
-    and refuses to register new hits until LEDs stop flashing (1 hp/second)
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
 
 /*
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -121,103 +110,157 @@ I2C Slave
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-uint8_t EEMEM eep_model = 0x01;
-uint8_t EEMEM eep_vhard = 0x00;
-uint8_t EEMEM eep_vfirm = 0x00;
-uint8_t EEMEM eep_myID = 0x01;
+uint8_t EEMEM eep_model = YETIS_MODEL;
+uint8_t EEMEM eep_vhard = YETIS_HARDWARE_REVISION;
+uint8_t EEMEM eep_vfirm = YETIS_FIRMWARE_REVISION;
+uint8_t EEMEM eep_idOffset = 0;	// Offset from model's minimum ID
 
-uint16_t EEMEM eep_hit_duration = 1000;	// [ms]
-uint16_t EEMEM eep_hit_standoff = 1000; // [ms]
-
-uint8_t EEMEM eep_led_hit = 0x01;		// alternating at 10Hz
-uint8_t EEMEM eep_led_flag = 0x02;		// synchronous at 5Hz
-uint8_t EEMEM eep_led_cap = 0x03;		// 'flowing' at 5Hz
+uint8_t EEMEM eep_hit_durationL = (1000>>0)&0xFF;	// [ms]
+uint8_t EEMEM eep_hit_durationH = (1000>>8)&0xFF;	// [ms]
+uint8_t EEMEM eep_hit_standoffL = (1000>>0)&0xFF;	// [ms]
+uint8_t EEMEM eep_hit_standoffH = (1000>>8)&0xFF;	// [ms]
+uint8_t EEMEM eep_dph_value = 1;	// [damage per hit]
 
 uint8_t EEMEM eep_fsr_sdph = 5;	// Sequential ADC Detections Per Hit
 uint8_t EEMEM eep_fsr_threshold = 230;	// ADC Threshold for Detection
 
-
+uint8_t EEMEM eep_leds_hit = (LEDS_ALTERNATING | FREQ_10_000Hz);
+uint8_t EEMEM eep_leds_flag = (LEDS_SYNCHRONOUS | FREQ_05_000Hz);
+uint8_t EEMEM eep_leds_cap = (LEDS_FLOWING | FREQ_05_000Hz);
 
 /*
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-YETIS_I2C_UNIVERSALS
-	ADDR: NAME
-	0x00: Model Number								(R-)
-			TARGET PANEL:	0x01
-			TOPLED/BUZZER:	0x02
-			FIRE CONTROL:	0x05
-	0x01: Hardware Revision							(R-)
-	0x02: Firmware Revision							(R-)
-	0x03: ID Number									(RW)
-			TARGET PANEL:	0x00~0x1F
-			TOPLED/BUZZER:	0x20~0x2F
-			FIRE CONTROL:	0x50~0x5F
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-YETIS_ITB_I2C properties
-	ADDR: NAME
-	0x10: Status
-		Bit-0: (R-) IM_HIT (cleared when READ by master)
-		Bit-1: (-W) OTHER_HIT
-		Bit-2: (-W) HAVE_FLAG
-		Bit-3: (-W) AM_CAPTURING
-
-		Bit-4: (--) RESERVED for future use
-		Bit-5: (--) RESERVED for future use
-		Bit-6: (-W) SAVE current settings to EEPROM
-		Bit-7: (-W) REBOOT (to EEPROM defaults using WDReset)
-
-	0x11: Number Hits since last read					(R-) (0x00~0xFF)
-
-Default values grabbed from EEPROM at boot
-	0x21: Hit Duration [ms](L)							(RW) (0x0000~0xFFFF)
-	0x22: Hit Duration [ms](H)							(RW) (0x0000~0xFFFF)
-	0x23: Hit Standoff [ms](L)							(RW) (0x0000~0xFFFF)
-	0x24: Hit Standoff [ms](H)							(RW) (0x0000~0xFFFF)
-
-	0x30: FSR Sequential Detections Per Hit				(RW) (1~50)
-	0x31: FSR Threshold									(RW) (50~250)
-	0x32: FSR CALIBRATION MODE ENABLE					(RW) (0~1)
-
-		LED: xSSS xRRR
-			RRR		000	 0.25Hz
-					001	 0.50Hz
-					010	 1.00Hz
-					011	 2.00Hz
-					100	 5.00Hz
-					101	10.00Hz
-			SSS
-					000	alternating
-					001 synchronous
-					010	'flowing' (NONE, CH1, CH1+CH2, CH2, NONE)
-					100 CH1 only
-					101 CH2 only
-	0x40: LED Hit Value									(RW) (0x00~0x??)
-	0x41: LED Flag Value								(RW) (0x00~0x??)
-	0x42: LED Capture Value								(RW) (0x00~0x??)
-
-
+uint8_t EEMEM eep_buzz_hit = (BUZZ_WARBLE | FREQ_02_000Hz);
+uint8_t EEMEM eep_buzz_flag = (BUZZ_BEEP_HIGH | FREQ_05_000Hz);
+uint8_t EEMEM eep_buzz_cap = (BUZZ_RISING | FREQ_01_000Hz);
 */
-volatile uint8_t conti_table[] =
-{
-	0x00,	// Status register
+
+
+volatile uint8_t x00_table[] =
+{			// ADDR: NAME
+	0x00,	// 0x00: Model Number						(R-)
+				// LIGHTS/TARGET BOARD:	0x01
+				// LIGHTS/SOUNDS BOARD:	0x02
+				// FIRE CONTROL BOARD:	0x05
+	0x00,	// 0x01: Hardware Revision					(R-)
+	0x00,	// 0x02: Firmware Revision					(R-)
+	0x00	// 0x03: ID Number							(RW)
+				// LIGHTS/TARGET BOARD:	0x00~0x1F
+				// LIGHTS/SOUNDS BOARD:	0x20~0x2F
+				// FIRE CONTROL BOARD:	0x50~0x5F
+
+};
+const uint8_t x00_table_size = sizeof(x00_table);
+
+volatile uint8_t x10_table[] =
+{			// ADDR: NAME
+	0x00,	// 0x10: Status
 				// Bit-0: (R-) IM_HIT (cleared when READ by master)
 				// Bit-1: (-W) OTHER_HIT
 				// Bit-2: (-W) HAVE_FLAG
-				// Bit-3: (RW) RESERVED for future use
-				
-				// Bit-4: (-W) Save current ID to EEPROM
-				// Bit-5: (-W) Save current FSR_SDPH to EEPROM
-				// Bit-6: (-W) Save current FSR_THR to EEPROM
-				// Bit-7: (-W) RESET (to EEPROM defaults using WDReset)
+				// Bit-3: (-W) AM_CAPTURING
 
-// Default values grabbed from EEPROM at boot
-	0x00,	// ID register									(RW) (0x00~0x1F)
-	0x00,	// FSR Sequential Detections Per Hit register	(RW) (1~50)
-	0x00	// FSR Threshold register						(RW) (50~250)
+				// Bit-3: (--) RESERVED for future use
+				// Bit-3: (--) RESERVED for future use
+				// Bit-6: (-W) SAVE current settings to EEPROM
+				// Bit-7: (-W) RESET (to EEPROM defaults using WDReset)
+	0x00,	// 0x11: Damage since last reboot(L)		(R-) (0x0000~0xFFFF)
+	0x00	// 0x12: Damage since last reboot(H)		(R-) (0x0000~0xFFFF)
 };
-const uint8_t conti_size = sizeof(conti_table);
-// Tracks the current register pointer position
-volatile uint8_t conti_pos;
+const uint8_t x10_table_size = sizeof(x10_table);
+
+volatile uint8_t x20_table[] =
+{			// ADDR: NAME
+	0x00,	// 0x20: Hit Duration [ms](L)				(RW) (0x0000~0xFFFF)
+	0x00,	// 0x21: Hit Duration [ms](H)				(RW) (0x0000~0xFFFF)
+	0x00,	// 0x22: Hit Standoff [ms](L)				(RW) (0x0000~0xFFFF)
+	0x00,	// 0x23: Hit Standoff [ms](H)				(RW) (0x0000~0xFFFF)
+	0x00	// 0x24: Damage-Per-Hit Value				(RW) (0x00~0xFF)
+
+};
+const uint8_t x20_table_size = sizeof(x20_table);
+
+volatile uint8_t x30_table[] =
+{			// ADDR: NAME
+	0x00,	// 0x30: FSR Sequential Detections Per Hit	(RW) (1~50)
+	0x00,	// 0x31: FSR Threshold						(RW) (50~250)
+	0x00	// 0x32: FSR CALIBRATION MODE ENABLE		(RW) (0~1)
+};
+const uint8_t x30_table_size = sizeof(x30_table);
+
+/*
+	LED: xSSS FRRR
+		F
+				1	FORCE_ACTIVE
+		RRR
+				000	FREQ_00_000Hz
+				001	FREQ_00_125Hz
+				010	FREQ_00_250Hz
+				011	FREQ_00_500Hz
+				100	FREQ_01_000Hz
+				101	FREQ_02_000Hz
+				110	FREQ_05_000Hz
+				111	FREQ_10_000Hz
+		SSS
+				000	ALTERNATING
+				001	SYNCHRONOUS
+				010	FLOWING (NONE, CH1, CH1+CH2, CH2, NONE)
+				011	CH1_ONLY
+				100	CH2_ONLY
+				101	CH1_SOLID + CH2_FLASHING
+				110	CH1_FLASHING + CH2_SOLID
+
+*/
+volatile uint8_t x40_table[] =
+{			// ADDR: NAME
+	0x00,	// 0x40: LED Hit Value						(RW) (0x00~0xFF)
+	0x00,	// 0x41: LED Flag Value						(RW) (0x00~0xFF)
+	0x00,	// 0x42: LED Capture Value					(RW) (0x00~0xFF)
+	0x00	// 0x43: LED State							(RW) (0x00~0xFF)
+};
+const uint8_t x40_table_size = sizeof(x40_table);
+
+/*
+	BUZZER: xSSS FRRR
+		F
+				1	FORCE_ACTIVE
+		RRR
+				000	FREQ_00_000Hz
+				001	FREQ_00_125Hz
+				010	FREQ_00_250Hz
+				011	FREQ_00_500Hz
+				100	FREQ_01_000Hz
+				101	FREQ_02_000Hz
+				110	FREQ_05_000Hz
+				111	FREQ_10_000Hz
+		SSS
+				000	BEEP_LOW
+				001	BEEP_MID
+				010	BEEP_HIGH
+				011	WARBLE
+				100	WAHWAHWAH
+				101	RISING
+				110	FALLING
+*/
+/*
+volatile uint8_t x50_table[] =
+{			// ADDR: NAME
+	0x00,	// 0x50: Buzzer Hit Value					(RW) (0x00~0xFF)
+	0x00,	// 0x51: Buzzer Flag Value					(RW) (0x00~0xFF)
+	0x00,	// 0x52: Buzzer Capture Value				(RW) (0x00~0xFF)
+	0x00	// 0x53: Buzzer State						(RW) (0x00~0xFF)
+};
+const uint8_t x50_table_size = sizeof(x50_table);
+*/
+/*
+volatile uint8_t x60_table[] =
+{			// ADDR: NAME
+};
+const uint8_t x60_table_size = sizeof(x60_table);
+*/
+
+// Tracks the current register address
+volatile uint8_t reg_addr;
+
 // Tracks whether to start a conversion cycle
 volatile bool start_conversion;
 
@@ -232,14 +275,7 @@ void setup()
 #endif
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Create some variables
-	uint16_t fsr = 255;
-	uint8_t hit_detect = 0;
-
-// Grab defaults from EEPROM
-	conti_table[1] = eeprom_read_byte(&eep_myID);
-	conti_table[2] = eeprom_read_byte(&eep_fsr_sdph);
-	conti_table[3] = eeprom_read_byte(&eep_fsr_threshold);
+	grabFromEEPROM();
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// Set PB4 and PB1 output (LED outputs enabled)
@@ -249,6 +285,7 @@ void setup()
 	// Disable PB3/ADC3 pull-up (use 10k external pull-up)
 	PORTB &= ~(1<<PIN3);
 
+#if (YETIS_MODEL == 0x01)
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ADC Setup for normal usage
 	// Use Vcc as reference, Left Adjust Result, Select ADC3
@@ -270,290 +307,26 @@ void setup()
 	uint8_t garbage = ADCH;
 */
 	ADC_poll();
+#else
+	// Set PB3 output (BUZZER output enabled)
+	DDRB |= (1<<PIN3);
+	// Set PB3 low (BUZZER OFF)
+	PORTB &= ~(1<<PIN3);
+#endif
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	if (I2C_ENABLED==1)
-	{
-		// Set I2C event functions
-		usi_onReceiverPtr = I2C_Rx_Event;
-		usi_onRequestPtr = I2C_Rq_Event;
+	// Set I2C event functions
+	usi_onReceiverPtr = I2C_Rx_Event;
+	usi_onRequestPtr = I2C_Rq_Event;
 
-		// Set device address to 0x42 while in configuration mode
-		usiTwiSlaveInit(BASE_PANEL_ID);
-	}
-
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/// Configuration Mode
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	uint8_t count = 0;
-// Check for SENSE line pulled low for 5 seconds
-	while(count<200)
-	{
-		safe_sleep(25);
-		if(ADC_poll() > 50)
-			return;
-		count++;
-	}
-// Successfully entered Configuration mode (flash LED1 until SENSE released)
-	while(ADC_poll() < 50)
-	{
-		LED1_ON();
-		safe_sleep(100);
-		LED1_OFF();
-		safe_sleep(100);
-	}
-// Select which setting to change
-	while(1)
-	{
-		count = 0;
-		uint8_t modus = 0;
-		LED1_OFF(); LED2_OFF();
-
-// Display mode setting and use a 3 second timeout.
-		while(count<120)
-		{
-			// ID (LED1 on, LED2 off)
-			if (modus==1)
-			{
-				LED1_ON(); LED2_OFF();
-			}
-
-			// SDPH (LED1 off, LED2 on)
-			if (modus==2)
-			{
-				LED1_OFF(); LED2_ON();
-			}
-
-			// DTHR (LED1 on, LED2 on)
-			if (modus==3)
-			{
-				LED1_ON(); LED2_ON();
-			}
-
-			// SENSE pulled low
-			if (ADC_poll()<50)
-			{
-				modus++;
-				if (modus>3)
-					modus = 0;
-				safe_sleep(500);
-				count=0;
-			}
-			else
-			{
-				count++;
-				safe_sleep(25);
-			}
-		}
-
-
-/*
-    Set 'ID' (LED1 off; LED2 pulsing on 1~12 times, then off 1s):
-      When LED2 pulses N==ID, pull SENSE low until LED1 on and LED2 off
-      Release SENSE and LED1 will pulse the newly set ID with LED2 on solid
-      LED2 flashing and LED1 on solid for 5s
-        If pull SENSE low ~1s, LED1 off and new ID will be saved to EEPROM
-*/
-		if (modus==1)
-		{
-			LED1_OFF(); LED2_OFF();
-			uint8_t iter=0, tempID=0;
-
-			while(1)
-			{
-				tempID++;
-				for (iter=0; iter<tempID; iter++)
-				{
-					LED2_ON();
-					safe_sleep(500);
-					LED2_OFF();
-					safe_sleep(500);
-				}
-
-				safe_sleep(1000);
-				if (ADC_poll() < 50)
-				{
-					break;
-				}
-
-				if (tempID > 12)
-					tempID=0;
-			}
-
-			conti_table[1] = tempID;
-			LED1_ON(); LED2_OFF();
-			while(ADC_poll() < 50)
-			{
-				safe_sleep(25);
-			}
-			LED1_OFF(); LED2_ON();
-
-			for (iter=0; iter<conti_table[1]; iter++)
-			{
-				LED1_ON();
-				safe_sleep(500);
-				LED1_OFF();
-				safe_sleep(500);
-			}
-
-			count = 0;
-			uint8_t sense_count = 0;
-			LED1_ON(); LED2_OFF();
-			while(count<200)
-			{
-				if (count&0x01)
-					LED2_ON();
-				else
-					LED2_OFF();
-
-				count++;
-				safe_sleep(25);
-
-				if(ADC_poll() < 50)
-					sense_count++;
-				else
-					sense_count=0;
-
-				if (sense_count>40)
-				{
-					LED1_OFF();
-					eeprom_write_byte(&eep_myID, conti_table[1]);
-					break;
-				}
-			}
-
-
-		}
-
-/*
-    Set 'Sequential Detections Per Hit' (LED1 on; LED2 pulsing on 1~12 times, then off 1s):
-      When LED2 pulses N==SDPH, pull SENSE low until LED1 off and LED2 on
-      Release SENSE and LED1 will pulse the newly set SDPH with LED2 on solid
-      LED2 flashing and LED1 on solid for 5s
-        If pull SENSE low ~1s, LED1 off and new SDPH will be saved to EEPROM
-*/
-		else if (modus==2)
-		{
-
-
-
-
-			count = 0;
-			uint8_t sense_count = 0;
-			LED1_ON(); LED2_OFF();
-			while(count<200)
-			{
-				if (count&0x01)
-					LED2_ON();
-				else
-					LED2_OFF();
-
-				count++;
-				safe_sleep(25);
-
-				if(ADC_poll() < 50)
-					sense_count++;
-				else
-					sense_count=0;
-
-				if (sense_count>40)
-				{
-					LED1_OFF();
-					eeprom_write_byte(&eep_fsr_sdph, conti_table[2]);
-					break;
-				}
-			}
-	
-		}
-
-/*
-    Set 'Detection Threshold' (LED1 on; LED2 flashing at ~5HZ)
-      Shoot target panel as many times as desired.
-      Board will save 20 biggest impacts
-      Pull SENSE low for ~2s to find arithmetic mean of those 20 hits,
-        then set Threshold to (arithmetic mean + 10) and save to EEPROM.
-
-*/
-		else if (modus==3)
-		{
-			uint8_t sense_count = 0; count = 0;
-			uint8_t iter=0;
-			uint8_t big_hits[20] = {255};
-			uint8_t hit_now = 0;
-			uint8_t hit_last = 0;
-
-			LED1_ON(); LED2_OFF();
-			while(1)
-			{
-				hit_now = ADC_poll();
-
-				// BB still increasingly compressing FSR
-				if (hit_now < hit_last)
-					hit_last = hit_now;
-				// BB rebounding or button pressed
-				else
-				{
-					if (hit_last > 50)
-					{
-						sense_count = 0;
-						// Add hit_last to list of BB-hit values
-						for (iter=0; iter<20; iter++)
-						{
-							if (hit_last < big_hits[iter])
-							{
-								big_hits[iter] = hit_last;
-								break;
-							}
-						}
-					}
-					else
-					{
-						sense_count++;
-					}
-				}
-
-
-				}
-				safe_sleep(1);
-			}
-	
-
-			uint32_t tempThreshold=0;
-			for (iter=0; iter<20; iter++)
-			{
-				tempThreshold += big_hits[iter];
-			}
-			tempThreshold = (tempThreshold/20)+10;
-			if ( (tempThreshold < 250) && (tempThreshold > 50) )
-			{
-				conti_table[3] = tempThreshold;
-				eeprom_write_byte(&eep_fsr_threshold, conti_table[3]);
-			}
-			else
-			{
-				while(1)
-				{
-					LED1_ON(); LED2_OFF;
-					safe_sleep(25);
-					LED1_OFF(); LED2_ON;
-					safe_sleep(25);
-					
-				}
-			}
-		}
-		else
-			break;
-	}
-
+	// Set device address (use some default in setup() config?)
+	usiTwiSlaveInit(x00_table[3]);
 }
 
 
 
 void loop()
 {
-// Create some variables
-	uint16_t fsr = 255;
-	uint8_t hit_detect = 0;
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Simple Digital Mode
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -643,18 +416,83 @@ void loop()
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// I2C Slave Mode
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	else if (I2C_ENABLED==1)
-	{
-		// Set device address to Panel number plus 0x42
-		usiTwiSlaveInit(conti_table[1]+BASE_PANEL_ID);
+// Create some variables
+	uint16_t fsr = 255;
+	uint8_t hit_detect = 0;
+	uint16_t damage = 0;
 
-		while(1)
+// Set device address
+	usiTwiSlaveInit(x00_table[3]);
+
+	while(1)
+	{
+		// Rolling average to cut down on noise
+		fsr = ((fsr + ADC_poll())>>1);
+
+		// Increment a consecutive 'hit' counter to cut down on noise
+		if (fsr < x30_table[0])
 		{
-			
+			hit_detect++;
 		}
+		else
+		{
+			hit_detect = 0;
+		}
+	
+		// If possible 'hits' > threshold, probably did get hit
+		if (hit_detect > x30_table[1])
+		{
+			// Let transponder know we got hit and compute new damage count
+			x10_table[0] |= IM_HIT;
+			damage += x20_table[4];
+			x10_table[1] = (damage>>0)&0xFF;
+			x10_table[2] = (damage>>8)&0xFF;
+		}
+
+
+		if (x40_table[0] & FORCE_ACTIVE)
+		{
+			control_leds(x40_table[0]);
+		}
+		else if (x10_table[0] & IM_HIT)
+		{
+			control_leds(x40_table[1]);
+		}
+		else if (x10_table[0] & OTHER_HIT)
+		{
+			control_leds(x40_table[2]);
+		}
+		else if (x10_table[0] & HAVE_FLAG)
+		{
+			control_leds(x40_table[3]);
+		}
+		else if (x10_table[0] & AM_CAPTURING)
+		{
+			control_leds(x40_table[4]);
+		}
+
+	}	// while(1)
+
+}	// loop()
+
+
+
+void control_leds(uint8_t state)
+{
+	uint8_t rate = state&0x07;
+	uint8_t seq = state&0x70;
+
+// handle actual LED switching in ISR(TIMER0_OVF_vect)
+	if (seq == LEDS_ALTERNATING)
+	{
 	}
 
+	if (rate == FREQ_00_000Hz)
+	{
+	}
 }
+
+
 
 uint8_t ADC_poll(void)
 {
@@ -701,17 +539,75 @@ void I2C_Rx_Event(uint8_t nBytes)
 		return;
 
 	// Get write address
-	conti_pos = usiTwiReceiveByte();
+	reg_addr = usiTwiReceiveByte();
 
 	nBytes--;
 	while(nBytes--)
 	{
 		// No roll-over
-		if (conti_pos < conti_size)
+		if ( reg_addr < (0x00+x00_table_size) )
 		{
-			// Save to table
-			conti_table[conti_pos++] = usiTwiReceiveByte();
+			// Save new ID to table
+			if (reg_addr == 0x03)
+				x00_table[3] = usiTwiReceiveByte();
+			reg_addr++;
 		}
+		else if ( reg_addr < 0x20 )
+		{
+			// Discard excess data
+			uint8_t more_garbage = usiTwiReceiveByte();
+			reg_addr++;
+		}
+		else if ( reg_addr < (0x20+x20_table_size) )
+		{
+			// Save new HIT values to table
+			x20_table[(reg_addr&0x0F)] = usiTwiReceiveByte();
+			reg_addr++;
+		}
+		else if ( reg_addr < 0x30 )
+		{
+			// Discard excess data
+			uint8_t more_garbage = usiTwiReceiveByte();
+			reg_addr++;
+		}
+		else if ( reg_addr < (0x30+x30_table_size) )
+		{
+			// Save new FSR values to table
+			x30_table[(reg_addr&0x0F)] = usiTwiReceiveByte();
+			reg_addr++;
+		}
+		else if ( reg_addr < 0x40 )
+		{
+			// Discard excess data
+			uint8_t more_garbage = usiTwiReceiveByte();
+			reg_addr++;
+		}
+		else if ( reg_addr < (0x40+x40_table_size) )
+		{
+			// Save new LED values to table
+			x40_table[(reg_addr&0x0F)] = usiTwiReceiveByte();
+			reg_addr++;
+		}
+		else if ( reg_addr < 0x50 )
+		{
+			// Discard excess data
+			uint8_t more_garbage = usiTwiReceiveByte();
+			reg_addr++;
+		}
+/*		
+		else if ( reg_addr < (0x50+x50_table_size) )
+		{
+			// Save new BUZZER values to table
+			x50_table[(reg_addr&0x0F)] = usiTwiReceiveByte();
+			reg_addr++;
+		}
+		else if ( reg_addr < 0x60 )
+		{
+			// Discard excess data
+			uint8_t more_garbage = usiTwiReceiveByte();
+			reg_addr++;
+		}
+*/
 		else
 		{
 			// Discard excess data
@@ -723,9 +619,9 @@ void I2C_Rx_Event(uint8_t nBytes)
 void I2C_Rq_Event(void)
 {
 	// If master reading status, clear IM_HIT bit
-	if (conti_pos==0)
+	if (reg_addr==0x10)
 	{
-		conti_table[0] &= ~(1<<0);
+		x10_table[0] &= ~IM_HIT;
 	}
 
 	// Send byte at current position in table
@@ -735,6 +631,76 @@ void I2C_Rq_Event(void)
 	{
 		conti_pos = 0;
 	}
+
+
+	// No roll-over
+	if ( reg_addr < (0x00+x00_table_size) )
+	{
+		usiTwiTransmitByte( x00_table[(reg_addr&0x0F)] );
+		reg_addr++;
+	}
+	else if ( reg_addr < 0x10 )
+	{
+		usiTwiTransmitByte( 0x00 );
+		reg_addr++;
+	}
+	if ( reg_addr < (0x10+x10_table_size) )
+	{
+		usiTwiTransmitByte( x10_table[(reg_addr&0x0F)] );
+		reg_addr++;
+	}
+	else if ( reg_addr < 0x20 )
+	{
+		usiTwiTransmitByte( 0x00 );
+		reg_addr++;
+	}
+	else if ( reg_addr < (0x20+x20_table_size) )
+	{
+		usiTwiTransmitByte( x20_table[(reg_addr&0x0F)] );
+		reg_addr++;
+	}
+	else if ( reg_addr < 0x30 )
+	{
+		usiTwiTransmitByte( 0x00 );
+		reg_addr++;
+	}
+	else if ( reg_addr < (0x30+x30_table_size) )
+	{
+		usiTwiTransmitByte( x30_table[(reg_addr&0x0F)] );
+		reg_addr++;
+	}
+	else if ( reg_addr < 0x40 )
+	{
+		usiTwiTransmitByte( 0x00 );
+		reg_addr++;
+	}
+	else if ( reg_addr < (0x40+x40_table_size) )
+	{
+		usiTwiTransmitByte( x40_table[(reg_addr&0x0F)] );
+		reg_addr++;
+	}
+	else if ( reg_addr < 0x50 )
+	{
+		usiTwiTransmitByte( 0x00 );
+		reg_addr++;
+	}
+/*		
+	else if ( reg_addr < (0x50+x50_table_size) )
+	{
+		usiTwiTransmitByte( x50_table[(reg_addr&0x0F)] );
+		reg_addr++;
+	}
+	else if ( reg_addr < 0x60 )
+	{
+		usiTwiTransmitByte( 0x00 );
+		reg_addr++;
+	}
+*/
+	else
+	{
+		usiTwiTransmitByte( 0x00 );
+	}
+
 }
 
 
@@ -759,13 +725,8 @@ void configTimer0_millis(void)
 	// Timer0/Counter0 - 8-bit
 	stopTimer0();
 
-#if defined(__ATtiny13__)
-	// 9.6e6/(64*150) = 1ms
-	OCR0A = 149;
-#else
 	// 8.0e6/(64*125) = 1ms
 	OCR0A = 124;
-#endif
 
 	// Enable OCR0A interrupt
 //	TIMSK0 = (1<<OCIE0B) | (0<<OCIE0A) | (0<<TOIE0);
@@ -779,16 +740,11 @@ void configTimer0_millis(void)
 	TCCR0B = (0<<FOC0A) | (0<<FOC0B) | (1<<WGM02) | (0<<CS02) | (1<<CS01) | (1<<CS00);
 }
 
-#if defined(__ATtiny13__)
-ISR(TIM0_OVF_vect)
-#else
 ISR(TIMER0_OVF_vect)
-#endif
 {
 	millis_counter++;
-#if defined(I2C_ENABLED==1)
 	I2C_Stop_Check();
-#endif
+
 	if (milli_snoozer)
 	{
 		if (millis_countdown>0)
@@ -816,6 +772,141 @@ void safe_sleep(uint32_t snooze_ms)
 	millis_countdown = snooze_ms;
 	milli_snoozer = TRUE;
 	while(milli_snoozer);
+}
+
+
+void fsr_calibration(void)
+{
+/*
+	Write FSR_CALIBRATION_MODE_ENABLE = 1
+		(LED1 on; LED2 flashing at ~5Hz)
+		Shoot target panel as many times as desired.
+			Board will save 20 biggest impacts
+	Write FSR_CALIBRATION_MODE_ENABLE = 0
+	Test out new value
+	Write to EEPROM?
+*/
+	uint8_t iter=0;
+	uint8_t big_hits[20] = {255};
+	uint8_t hit_now = 0;
+	uint8_t hit_last = 0;
+
+	control_led( (LEDS_CH1S_CH2F | FREQ_05_000Hz) );
+	while( x30_table[2] == 1 )
+	{
+		hit_now = ADC_poll();
+
+		// BB still increasingly compressing FSR
+		if (hit_now < hit_last)
+		{
+			hit_last = hit_now;
+		}
+		// BB rebounding or button pressed
+		else
+		{
+			// Add hit_last to list of BB-hit values
+			for (iter=0; iter<20; iter++)
+			{
+				if (hit_last < big_hits[iter])
+				{
+					big_hits[iter] = hit_last;
+					break;
+				}
+			}
+		}
+		safe_sleep(1);
+	}
+
+
+	uint32_t tempThreshold=0;
+	for (iter=0; iter<20; iter++)
+	{
+		tempThreshold += big_hits[iter];
+	}
+	tempThreshold = (tempThreshold/20)+10;
+	if ( (tempThreshold < 250) && (tempThreshold > 50) )
+	{
+		x30_table[1] = (uint8_t) tempThreshold;
+	}
+	else
+	{
+		while(1)
+		{
+			LED1_ON(); LED2_OFF;
+			safe_sleep(25);
+			LED1_OFF(); LED2_ON;
+			safe_sleep(25);
+			
+		}
+	}
+}
+
+void grabFromEEPROM(void)
+{
+// Create some variables
+	uint8_t tempByte = 0;
+
+// Grab defaults from EEPROM
+	x00_table[0] = eeprom_read_byte(&eep_model);
+	x00_table[1] = eeprom_read_byte(&eep_vhard);
+	x00_table[2] = eeprom_read_byte(&eep_vfirm);
+	tempByte = eeprom_read_byte(&eep_idOffset);
+	x00_table[3] = tempByte + YETIS_MIN_ID_LTB;
+
+	x10_table[0] = 0;
+	x10_table[1] = 0;
+	x10_table[2] = 0;
+
+	x20_table[0] = eeprom_read_byte(&eep_hit_durationL);
+	x20_table[1] = eeprom_read_byte(&eep_hit_durationH);
+	x20_table[2] = eeprom_read_byte(&eep_hit_standoffL);
+	x20_table[3] = eeprom_read_byte(&eep_hit_standoffH);
+	x20_table[4] = eeprom_read_byte(&eep_dph_value);
+
+	x30_table[0] = eeprom_read_byte(&eep_fsr_sdph);
+	x30_table[1] = eeprom_read_byte(&eep_fsr_threshold);
+	x30_table[2] = 0;
+
+	x40_table[0] = eeprom_read_byte(&eep_leds_hit);
+	x40_table[1] = eeprom_read_byte(&eep_leds_flag);
+	x40_table[2] = eeprom_read_byte(&eep_leds_cap);
+	x40_table[3] = 0;
+
+/*
+	x50_table[0] = eeprom_read_byte(&eep_buzz_hit);
+	x50_table[1] = eeprom_read_byte(&eep_buzz_flag);
+	x50_table[2] = eeprom_read_byte(&eep_buzz_cap);
+	x50_table[3] = 0;
+*/
+}
+
+void saveToEEPROM(void)
+{
+// Create some variables
+	uint8_t tempByte = 0;
+
+// Save tables to EEPROM
+	tempByte = x00_table[3] - YETIS_MIN_ID_LTB;
+	eeprom_write_byte(&eep_idOffset, tempByte);
+
+	eeprom_write_byte(&eep_hit_durationL, x20_table[0]);
+	eeprom_write_byte(&eep_hit_durationH, x20_table[1]);
+	eeprom_write_byte(&eep_hit_standoffL, x20_table[2]);
+	eeprom_write_byte(&eep_hit_standoffH, x20_table[3]);
+	eeprom_write_byte(&eep_dph_value, x20_table[4]);
+
+	eeprom_write_byte(&eep_fsr_sdph, x30_table[0]);
+	eeprom_write_byte(&eep_fsr_threshold, x30_table[1]);
+
+	eeprom_write_byte(&eep_leds_hit, x40_table[0]);
+	eeprom_write_byte(&eep_leds_flag, x40_table[1]);
+	eeprom_write_byte(&eep_leds_cap, x40_table[2]);
+
+/*
+	eeprom_write_byte(&eep_buzz_hit, x50_table[0]);
+	eeprom_write_byte(&eep_buzz_flag, x50_table[1]);
+	eeprom_write_byte(&eep_buzz_cap, x50_table[2]);
+*/
 }
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

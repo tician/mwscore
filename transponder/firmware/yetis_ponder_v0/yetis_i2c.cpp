@@ -3,11 +3,9 @@
 namespace mechwarfare
 {
 
-yetisI2C::yetisI2C(pin sda, pin scl)
+yetisI2C::yetisI2C(int sda, int scl)
 {
-	pin_i2c_sda = sda;
-	pin_i2c_scl	= scl;
-	Wire.begin(pin_i2c_sda, pin_i2c_scl); // Wire.begin(sda, scl)
+	Wire.begin(sda, scl); // Wire.begin(sda, scl)
 
 	numLTB = 0;
 	numLSB = 0;
@@ -229,7 +227,7 @@ uint16_t yetisI2C::process(uint8_t bussStatus)
 {
 	bussStatus &= ( HAVE_FLAG | AM_CAPTURING );
 
-	uint16_t numHits = 0;
+	uint16_t damage = 0;
 
 	// Poll I2C Lights/Target Boards
 	for (iter=0; iter<numLTB; iter++)
@@ -237,9 +235,9 @@ uint16_t yetisI2C::process(uint8_t bussStatus)
 		Wire.beginTransmission(idsLTB[iter]);
 		// Set ADDR of register at which to start next READ
 		Wire.write(0x10);
-		Wire.requestFrom(idsLTB[iter], 2);
+		Wire.requestFrom(idsLTB[iter], 3);
 
-		if ( Wire.available() != 2 )
+		if ( Wire.available() != 3 )
 		{
 			while (Wire.available()>0)
 			{
@@ -250,11 +248,13 @@ uint16_t yetisI2C::process(uint8_t bussStatus)
 		}
 
 		uint8_t status = Wire.read();
-		uint8_t numHit = Wire.read();
+		uint8_t damageL = Wire.read();
+		uint8_t damageH = Wire.read();
+		damage += (damageL<<0) + (damageH<<8);
+
 		if (status & IM_HIT)
 		{
 			bussStatus |= OTHER_HIT;
-			numHits += numHit;
 		}
 
 		Wire.endTrasmission();
@@ -280,7 +280,7 @@ uint16_t yetisI2C::process(uint8_t bussStatus)
 		Wire.endTrasmission();
 	}
 
-	return numHits;
+	return damage;
 }
 
 bool yetisI2C::weaponsFree(bool guns, bool laser)
@@ -307,6 +307,10 @@ bool yetisI2C::weaponsFree(bool guns, bool laser)
 
 		Wire.endTrasmission();
 	}
+	if (status & WEAPONS_FREE)
+		return true;
+	else
+		return false;
 }
 
 uint16_t yetisI2C::fire(uint8_t weapon_number)
@@ -350,7 +354,7 @@ uint16_t yetisI2C::fire(uint8_t weapon_number)
 	}
 	
 	Wire.write(0x10);
-	Wire.write(FIRE);
+	Wire.write(FIRE_ONCE);
 
 	Wire.endTrasmission();
 
