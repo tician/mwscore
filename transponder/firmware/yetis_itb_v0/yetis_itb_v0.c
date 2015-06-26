@@ -69,10 +69,10 @@
 /// PIN DEFINITIONS (LTB)
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	PB0 - I/O - SDA												DIP-P5	MOSI
-	PB1 - OUT - LED2 -	Pin : 62[Ohm] : [>] : [>] : GND			DIP-P6	MISO
+	PB1 - OUT - LED2 -	Pin : 62[Ohm] : [>] : [>] : GND			DIP-P6	MISO	OC1A
 	PB2 - I/O - SCL												DIP-P7	SCK
 	PB3 - ADC - BUTTON/SENSE (ADC3)								DIP-P2
-	PB4 - OUT - LED1 -	Pin : 62[Ohm] : [>] : [>] : GND			DIP-P3
+	PB4 - OUT - LED1 -	Pin : 62[Ohm] : [>] : [>] : GND			DIP-P3			OC1B
 	PB5 - N/A - RESET											DIP-P1	!RESET
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
@@ -192,22 +192,23 @@ const uint8_t x30_table_size = sizeof(x30_table);
 		F
 				1	FORCE_ACTIVE
 		RRR
-				000	FREQ_00_000Hz
-				001	FREQ_00_125Hz
-				010	FREQ_00_250Hz
-				011	FREQ_00_500Hz
-				100	FREQ_01_000Hz
-				101	FREQ_02_000Hz
-				110	FREQ_05_000Hz
-				111	FREQ_10_000Hz
+				000	FREQ_8_000Hz
+				001	FREQ_4_000Hz
+				010	FREQ_2_000Hz
+				011	FREQ_1_000Hz
+				100	FREQ_0_500Hz
+				101	FREQ_0_250Hz
+				110	FREQ_0_125Hz
+				111	FREQ_0_000Hz
 		SSS
-				000	ALTERNATING
-				001	SYNCHRONOUS
-				010	FLOWING (NONE, CH1, CH1+CH2, CH2, NONE)
-				011	CH1_ONLY
-				100	CH2_ONLY
-				101	CH1_SOLID + CH2_FLASHING
-				110	CH1_FLASHING + CH2_SOLID
+				000 NONE
+				001	ALTERNATING
+				010	SYNCHRONOUS
+				011	FLOWING (NONE, CH1, CH1+CH2, CH2, NONE)
+				100	CH1_ONLY
+				101	CH2_ONLY
+				110	CH1_SOLID + CH2_FLASHING
+				111	CH1_FLASHING + CH2_SOLID
 
 */
 volatile uint8_t x40_table[] =
@@ -224,22 +225,23 @@ const uint8_t x40_table_size = sizeof(x40_table);
 		F
 				1	FORCE_ACTIVE
 		RRR
-				000	FREQ_00_000Hz
-				001	FREQ_00_125Hz
-				010	FREQ_00_250Hz
-				011	FREQ_00_500Hz
-				100	FREQ_01_000Hz
-				101	FREQ_02_000Hz
-				110	FREQ_05_000Hz
-				111	FREQ_10_000Hz
+				000	FREQ_8_000Hz
+				001	FREQ_4_000Hz
+				010	FREQ_2_000Hz
+				011	FREQ_1_000Hz
+				100	FREQ_0_500Hz
+				101	FREQ_0_250Hz
+				110	FREQ_0_125Hz
+				111	FREQ_0_000Hz
 		SSS
-				000	BEEP_LOW
-				001	BEEP_MID
-				010	BEEP_HIGH
-				011	WARBLE
-				100	WAHWAHWAH
-				101	RISING
-				110	FALLING
+				000 NONE
+				001	BEEP_LOW
+				010	BEEP_MID
+				011	BEEP_HIGH
+				100	WARBLE
+				101	WAHWAHWAH
+				110	RISING
+				111	FALLING
 */
 /*
 volatile uint8_t x50_table[] =
@@ -477,20 +479,7 @@ void loop()
 
 
 
-void control_leds(uint8_t state)
-{
-	uint8_t rate = state&0x07;
-	uint8_t seq = state&0x70;
 
-// handle actual LED switching in ISR(TIMER0_OVF_vect)
-	if (seq == LEDS_ALTERNATING)
-	{
-	}
-
-	if (rate == FREQ_00_000Hz)
-	{
-	}
-}
 
 
 
@@ -731,7 +720,7 @@ void configTimer0_millis(void)
 	// Enable OCR0A interrupt
 //	TIMSK0 = (1<<OCIE0B) | (0<<OCIE0A) | (0<<TOIE0);
 	// Enable OVF interrupt
-	TIMSK0 = (0<<OCIE0B) | (0<<OCIE0A) | (1<<TOIE0);
+	TIMSK = (0<<OCIE0B) | (0<<OCIE0A) | (1<<TOIE0);
 
 	// PWM, Fast mode (TOP=OCRA)
 	// Compare Output Mode (OC0A disconnected, OC0B disconnected)
@@ -772,6 +761,158 @@ void safe_sleep(uint32_t snooze_ms)
 	millis_countdown = snooze_ms;
 	milli_snoozer = TRUE;
 	while(milli_snoozer);
+}
+
+
+
+///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+volatile uint8_t leds_count = 1;
+volatile uint8_t leds_top = 1;
+volatile uint8_t leds_CH1_HI = 0;
+volatile uint8_t leds_CH1_LO = 0;
+volatile uint8_t leds_CH2_HI = 0;
+volatile uint8_t leds_CH2_LO = 0;
+volatile bool leds_active = FALSE;
+
+void stopTimer1(void)
+{
+	// Disable timer clock while configuring
+	TCCR1 = 0;
+	// Reset count
+	TCNT1 = 0;
+}
+
+void configTimer1(void)
+{
+	// Timer1/Counter1 - 8-bit
+	stopTimer1();
+
+	// 8.0e6/(4096*122) = 16Hz
+//	OCR1A = 121;
+	OCR1C = 121;
+
+	// Enable OVF interrupt
+	TIMSK = (0<<OCIE1B) | (0<<OCIE1A) | (1<<TOIE1);
+
+	// Clear Timer/Counter on Compare Match: TOP=OCR1C
+	// Compare Output Mode (OC1A disconnected, OC1B disconnected)
+	// Enable counter clock (1/4096 prescaler)
+	TCCR1 = (1<<CTC1) | (0<<PWM1A) |(0<<COM1A1) | (0<<COM1A0) | (1<<CS13) | (1<<CS12) | (0<<CS11) | (1<<CS10);
+	GTCCR = (0<<PWM1B) | (0<<COM1B1) | (0<<COM1B0) | (0<<FOC1B) | (0<<FOC1A) | (0<<PSR1);
+}
+
+ISR(TIMER1_OVF_vect)
+{
+	if (!leds_active)
+		return;
+
+	if (leds_top == 0xFF)
+		leds_active = false;
+
+	if ( leds_count == leds_CH1_HI )
+		LED1_ON();
+	else if (leds_count == leds_CH1_LO)
+		LED1_OFF();
+
+	if ( leds_count == leds_CH2_HI )
+		LED2_ON();
+	else if (leds_count == leds_CH2_LO)
+		LED2_OFF();
+
+	if (leds_count < leds_top)
+		leds_count++;
+	else
+		leds_count = 0;
+}
+
+void control_leds(uint8_t state)
+{
+	LED1_OFF();
+	LED2_OFF();
+
+	leds_active = false;
+	leds_count = 0;
+	leds_top = 0xFF;
+
+// handle actual LED switching in ISR(TIMER1_OVF_vect)
+	uint8_t rate = state&0x07;
+	uint8_t seq = state&0x70;
+
+	if (seq == LEDS_NONE)
+		return;
+
+	uint8_t half_period = (1<<rate);
+	if (half_period > 64)
+	{
+		leds_top = 0xFF;
+		half_period = 0xFF;
+	}
+	else
+	{
+		leds_top = (half_period<<1);
+	}
+
+	if (seq == LEDS_ALTERNATING)
+	{
+		leds_CH1_HI = ( 0 );
+		leds_CH1_LO = ( half_period );
+
+		leds_CH2_HI = ( half_period );
+		leds_CH2_LO = ( 0 );
+	}
+	else if (seq == LEDS_SYNCHRONOUS)
+	{
+		leds_CH1_HI = ( 0 );
+		leds_CH1_LO = ( half_period );
+
+		leds_CH2_HI = ( 0 );
+		leds_CH2_LI = ( half_period );
+	}
+	else if (seq == LEDS_FLOWING)
+	{
+		leds_CH1_HI = ( 0 );
+		leds_CH1_LO = ( half_period );
+
+		leds_CH2_HI = ( (half_period>>1) );
+		leds_CH2_LO = ( (half_period>>1)+half_period );
+	}
+	else if (seq == LEDS_CH1_ONLY)
+	{
+		leds_CH1_HI = ( 0 );
+		leds_CH1_LO = ( half_period );
+
+		leds_CH2_HI = ( 0xFF );
+		leds_CH2_LO = ( 0 );
+	}
+	else if (seq == LEDS_CH2_ONLY)
+	{
+		leds_CH1_HI = ( 0xFF );
+		leds_CH1_LO = ( 0 );
+
+		leds_CH2_HI = ( 0 );
+		leds_CH2_LO = ( half_period );
+	}
+	else if (seq == LEDS_CH1S_CH2F)
+	{
+		leds_CH1_HI = ( 0 );
+		leds_CH1_LO = ( 0xFF );
+
+		leds_CH2_HI = ( 0 );
+		leds_CH2_LO = ( half_period );
+	}
+	else if (seq == LEDS_CH1F_CH2S)
+	{
+		leds_CH1_HI = ( 0 );
+		leds_CH1_LO = ( half_period );
+
+		leds_CH2_HI = ( 0 );
+		leds_CH2_LO = ( 0xFF );
+	}
+
+
+	leds_active = true;
 }
 
 
