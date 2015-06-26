@@ -100,25 +100,25 @@ CFLAGS += -Wa,-adhlns=$(<:%.c=%.lst)
 CFLAGS += $(CSTANDARD)
 
 #~~~~~~~~~~~~~~~~~~~~ Compiler Options C++ ~~~~~~~~~~~~~~~~~~~~
-CPPFLAGS = -mmcu=$(MCU) -I. -x c++ 
-#CPPFLAGS += -g$(DEBUG)
-CPPFLAGS += $(CPPDEFS)
-CPPFLAGS += -O$(OPT)
-CPPFLAGS += -funsigned-char
-CPPFLAGS += -funsigned-bitfields
-CPPFLAGS += -fpack-struct
-CPPFLAGS += -fshort-enums
-CPPFLAGS += -fno-exceptions
-CPPFLAGS += -Wall
-CPPFLAGS += -Wundef
-#CPPFLAGS += -mshort-calls
-#CPPFLAGS += -fno-unit-at-a-time
-#CPPFLAGS += -Wstrict-prototypes
-#CPPFLAGS += -Wunreachable-code
-#CPPFLAGS += -Wsign-compare
-CPPFLAGS += -Wa,-adhlns=$(<:%.cpp=%.lst)
-#CPPFLAGS += $(patsubst %,-I%,$(INCLUDE_DIRS))
-#CPPFLAGS += $(CSTANDARD)
+CXXFLAGS = -mmcu=$(MCU) -I. -x c++ 
+#CXXFLAGS += -g$(DEBUG)
+CXXFLAGS += $(CPPDEFS)
+CXXFLAGS += -O$(OPT)
+CXXFLAGS += -funsigned-char
+CXXFLAGS += -funsigned-bitfields
+CXXFLAGS += -fpack-struct
+CXXFLAGS += -fshort-enums
+CXXFLAGS += -fno-exceptions
+CXXFLAGS += -Wall
+CXXFLAGS += -Wundef
+#CXXFLAGS += -mshort-calls
+#CXXFLAGS += -fno-unit-at-a-time
+#CXXFLAGS += -Wstrict-prototypes
+#CXXFLAGS += -Wunreachable-code
+#CXXFLAGS += -Wsign-compare
+CXXFLAGS += -Wa,-adhlns=$(<:%.cpp=%.lst)
+#CXXFLAGS += $(patsubst %,-I%,$(INCLUDE_DIRS))
+#CXXFLAGS += $(CSTANDARD)
 
 #~~~~~~~~~~~~~~~~~~~~ Compiler Options Assembly ~~~~~~~~~~~~~~~~~~~~
 ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp
@@ -213,6 +213,7 @@ COPY = cp
 MSG_ERRORS_NONE = Errors: none
 MSG_BEGIN = -------- begin --------
 MSG_END = --------  end  --------
+MSG_BUILD_DIRS = Checking build directories exist:
 MSG_SIZE_BEFORE = Size before: 
 MSG_SIZE_AFTER = Size after:
 MSG_FLASH = Creating load file for Flash:
@@ -236,7 +237,19 @@ TARGET_SYM = $(TARGET).sym
 
 
 #~~~~~~~~~~~~~~~~~~~~ all ~~~~~~~~~~~~~~~~~~~~
-all: begin gccversion sizebefore build sizeafter end
+all: begin gccversion spotcheck sizebefore build sizeafter end
+
+#~~~~~~~~~~~~~~~~~~~~ build ~~~~~~~~~~~~~~~~~~~~
+spotcheck:
+	@echo $(MSG_BUILD_DIRS)
+	test -d $(BINDIR) || mkdir -p $(BINDIR)
+	test -d $(OBJDIR) || mkdir -p $(OBJDIR)
+	@echo
+
+#build: $(TARGET)
+
+#$(TARGET): $(OBJS)
+#	$(CXX) -o $@ $(OBJS) $(LDFLAGS)
 
 #~~~~~~~~~~~~~~~~~~~~ build ~~~~~~~~~~~~~~~~~~~~
 build: \
@@ -309,34 +322,34 @@ gccversion :
 
 #~~~~~~~~~~~~~~~~~~~~ Compiling ~~~~~~~~~~~~~~~~~~~~
 # Compile: create object files from C source files.
-%.o : %.c
+%.c.o: $(CSRCS)
 	@echo
 	@echo $(MSG_COMPILING) $<
 	$(CC) $(CFLAGS) -c $< -o $@ 
 
 # Compile: create object files from C++ source files.
-%.o : %.cpp
+%.cpp.o: $(CPPSRCS)
 	@echo
 	@echo $(MSG_COMPILING_CPP) $<
-	$(CXX) $(CPPFLAGS) -c $< -o $@ 
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Compile: create assembler files from C source files.
-%.s : %.c
-	$(CC) -S $(CFLAGS) $< -o $@
+#%.s : %.c
+#	$(CC) -S $(CFLAGS) $< -o $@
 
 # Compile: create assembler files from C++ source files.
-%.s : %.cpp
-	$(CXX) -S $(CPPFLAGS) $< -o $@
+#%.s : %.cpp
+#	$(CXX) -S $(CXXFLAGS) $< -o $@
 
 # Assemble: create object files from assembler source files.
-%.o : %.S
-	@echo
-	@echo $(MSG_ASSEMBLING) $<
-	$(AS) -c $(ASFLAGS) $< -o $@
+#%.o : %.S
+#	@echo
+#	@echo $(MSG_ASSEMBLING) $<
+#	$(AS) -c $(ASFLAGS) $< -o $@
 
 # Create preprocessed source for use in sending a bug report.
-%.i : %.c
-	$(CC) -E -mmcu=$(MCU) -I. $(CFLAGS) $< -o $@ 
+#%.i : %.c
+#	$(CC) -E -mmcu=$(MCU) -I. $(CFLAGS) $< -o $@ 
 
 
 # Include the dependency files.
