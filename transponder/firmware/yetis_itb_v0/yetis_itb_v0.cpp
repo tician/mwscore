@@ -370,54 +370,99 @@ void loop()
 	uint8_t hit_detect = 0;
 	uint16_t damage = 0;
 
+	uint32_t temp_millis = 0;
+	uint32_t im_hit_millis = 0;
+	uint32_t standoff_millis = 0;
+	uint8_t status = x10_table[0];
+
 // Set device address
 	usiTwiSlaveInit(x00_table[3]);
 
 	while(1)
 	{
-		// Rolling average to cut down on noise
-		fsr = ((fsr + ADC_poll())>>1);
+		temp_millis = millis();
 
-		// Increment a consecutive 'hit' counter to cut down on noise
-		if (fsr < x30_table[0])
+		if (temp_millis > im_hit_millis)
 		{
-			hit_detect++;
-		}
-		else
-		{
-			hit_detect = 0;
-		}
-	
-		// If possible 'hits' > threshold, probably did get hit
-		if (hit_detect > x30_table[1])
-		{
-			// Let transponder know we got hit and compute new damage count
-			x10_table[0] |= yetisI2Cdevs::IM_HIT;
-			damage += x20_table[4];
-			x10_table[1] = (damage>>0)&0xFF;
-			x10_table[2] = (damage>>8)&0xFF;
+			control_leds(0);
+			im_hit_millis = 0;
+			
 		}
 
+		if (standoff_millis == 0)
+		{
+			// Rolling average to cut down on noise
+			fsr = ((fsr + ADC_poll())>>1);
 
+			// Increment a consecutive 'hit' counter to cut down on noise
+			if (fsr < x30_table[0])
+			{
+				hit_detect++;
+			}
+			else
+			{
+				hit_detect = 0;
+			}
+
+			// If possible 'hits' > threshold, probably did get hit
+			if (hit_detect > x30_table[1])
+			{
+				// Let transponder know we got hit and compute new damage count
+				x10_table[0] |= yetisI2Cdevs::IM_HIT;
+				damage += x20_table[4];
+				x10_table[1] = (damage>>0)&0xFF;
+				x10_table[2] = (damage>>8)&0xFF;
+
+				hit_detect = 0;
+				im_hit_millis = temp_millis + (x20_table[0]<<0) + (x20_table[1]<<8);
+				standoff_millis = temp_millis + (x20_table[2]<<0) + (x20_table[3]<<8);
+			}
+		}
+		else if (temp_millis > standoff_millis)
+		{
+			control_leds(0);
+			standoff_millis = 0;
+		}
+
+		// Server forcing LEDs active with a sequence
 		if (x40_table[0] & yetisI2Cdevs::FORCE_ACTIVE)
 		{
+			x40_table[0] &= ~(yetisI2Cdevs::FORCE_ACTIVE);
 			control_leds(x40_table[0]);
 		}
-		else if (x10_table[0] & yetisI2Cdevs::IM_HIT)
+
+
+
+		// Have changed status since last transit through while(1)?
+		if (status == x10_table[0])
+		{
+			continue;
+		}
+		else	// 'just set IM_HIT', 'IM_HIT cleared by master read',
+				// or have other state change by server/transponder
+		{
+			status = x10_table[0];
+		}
+
+		if (status & yetisI2Cdevs::IM_HIT)
 		{
 			control_leds(x40_table[1]);
 		}
-		else if (x10_table[0] & yetisI2Cdevs::OTHER_HIT)
+		else if (status & yetisI2Cdevs::OTHER_HIT)
 		{
 			control_leds(x40_table[2]);
 		}
-		else if (x10_table[0] & yetisI2Cdevs::HAVE_FLAG)
+		else if (status & yetisI2Cdevs::HAVE_FLAG)
 		{
 			control_leds(x40_table[3]);
 		}
-		else if (x10_table[0] & yetisI2Cdevs::AM_CAPTURING)
+		else if (status & yetisI2Cdevs::AM_CAPTURING)
 		{
 			control_leds(x40_table[4]);
+		}
+		else
+		{
+			control_leds(0);
 		}
 
 	}	// while(1)
