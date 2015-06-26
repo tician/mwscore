@@ -34,6 +34,9 @@ Change Activity:
 #ifndef _USI_TWI_SLAVE_H_
 #define _USI_TWI_SLAVE_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 
 /********************************************************************************
@@ -92,6 +95,9 @@ void    (*usi_onReceiverPtr)(uint8_t);
 #  error TWI TX buffer size is not a power of 2
 #endif
 
+#ifdef __cplusplus
+}
+#endif
 
 
 #endif  // ifndef _USI_TWI_SLAVE_H_
