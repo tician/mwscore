@@ -30,6 +30,7 @@
 #if defined(__ATtiny25__) | defined(__ATtiny45__) | defined(__ATtiny85__)
 #define I2C_ENABLED		1
 #include "usiTwiSlave.h"
+#include "yetis_i2c_devs.hpp"
 
 #else
 #error 'INVALID DEVICE'
@@ -261,10 +262,10 @@ const uint8_t x60_table_size = sizeof(x60_table);
 */
 
 // Tracks the current register address
-volatile uint8_t reg_addr;
+volatile uint8_t reg_addr = 0x00;
 
 // Tracks whether to start a conversion cycle
-volatile bool start_conversion;
+volatile bool start_conversion = false;
 
 
 void setup()
