@@ -3,7 +3,7 @@ MAIN_OUT = yetis_itb_v0
 
 #~~~~~~~~~~~~~~~~~~~~ Source Files ~~~~~~~~~~~~~~~~~~~~
 MAIN_SRCC = \
-	yetis_itb_v0.c \
+	yetis_itb_v0.cpp \
 	usiTwiSlave.c
 
 MAIN_SRCCPP = 

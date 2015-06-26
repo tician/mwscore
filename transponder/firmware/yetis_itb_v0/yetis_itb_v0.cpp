@@ -27,14 +27,16 @@
 #include <avr/io.h>
 #include <avr/eeprom.h>
 
-#if defined(__ATtiny25__) | defined(__ATtiny45__) | defined(__ATtiny85__)
+//#if defined(__ATtiny25__) | defined(__ATtiny45__) | defined(__ATtiny85__)
+
+//#else
+//#error 'INVALID DEVICE'
+//#endif
+
 #define I2C_ENABLED		1
 #include "usiTwiSlave.h"
 #include "yetis_i2c_devs.hpp"
-
-#else
-#error 'INVALID DEVICE'
-#endif
+using namespace mechwarfare;
 
 #ifndef YETIS_MODEL
 #define YETIS_MODEL					0x01
@@ -125,14 +127,14 @@ uint8_t EEMEM eep_dph_value = 1;	// [damage per hit]
 uint8_t EEMEM eep_fsr_sdph = 5;	// Sequential ADC Detections Per Hit
 uint8_t EEMEM eep_fsr_threshold = 230;	// ADC Threshold for Detection
 
-uint8_t EEMEM eep_leds_hit = (LEDS_ALTERNATING | FREQ_10_000Hz);
-uint8_t EEMEM eep_leds_flag = (LEDS_SYNCHRONOUS | FREQ_05_000Hz);
-uint8_t EEMEM eep_leds_cap = (LEDS_FLOWING | FREQ_05_000Hz);
+uint8_t EEMEM eep_leds_hit = (yetisI2Cdevs::LEDS_ALTERNATING | yetisI2Cdevs::FREQ_8_000Hz);
+uint8_t EEMEM eep_leds_flag = (yetisI2Cdevs::LEDS_SYNCHRONOUS | yetisI2Cdevs::FREQ_4_000Hz);
+uint8_t EEMEM eep_leds_cap = (yetisI2Cdevs::LEDS_FLOWING | yetisI2Cdevs::FREQ_4_000Hz);
 
 /*
-uint8_t EEMEM eep_buzz_hit = (BUZZ_WARBLE | FREQ_02_000Hz);
-uint8_t EEMEM eep_buzz_flag = (BUZZ_BEEP_HIGH | FREQ_05_000Hz);
-uint8_t EEMEM eep_buzz_cap = (BUZZ_RISING | FREQ_01_000Hz);
+uint8_t EEMEM eep_buzz_hit = (yetisI2Cdevs::BUZZ_WARBLE | yetisI2Cdevs::FREQ_2_000Hz);
+uint8_t EEMEM eep_buzz_flag = (yetisI2Cdevs::BUZZ_BEEP_HIGH | yetisI2Cdevs::FREQ_4_000Hz);
+uint8_t EEMEM eep_buzz_cap = (yetisI2Cdevs::BUZZ_RISING | yetisI2Cdevs::FREQ_1_000Hz);
 */
 
 
@@ -331,92 +333,6 @@ void setup()
 void loop()
 {
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/// Simple Digital Mode
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	if (I2C_ENABLED==0)
-	{
-		// Set data pin to be Input with Pull-Up
-		DATA_IN();
-
-		while(1)
-		{
-			// If DATA Input == high
-			if (DATA_CHK())
-			{
-				// Check if FSR below threshold (5V:PUR:ADC:FSR:GND)
-					// (20k~50k internal pull-up) (10k external pull-up)
-/*
-				// Clear ADC Interrupt Flag
-				ADCSRA |= (uint8_t) (1 << ADIF);
-				// Begin ADC Conversion
-				ADCSRA |= (uint8_t) (1 << ADSC);
-
-				// Wait while ADC Interrupt Flag not set
-				while(!(ADCSRA & (1 << ADIF)));
-*/
-				// Rolling average to cut down on noise
-//				fsr = ((fsr + ADCH)>>1);
-				fsr = ((fsr + ADC_poll())>>1);
-
-				// Increment a consecutive 'hit' counter to cut down on noise
-				if (fsr < conti_table[2])
-				{
-					hit_detect++;
-				}
-				else
-				{
-					hit_detect = 0;
-				}
-			
-				// If possible 'hits' > threshold, really did get hit
-				if (hit_detect > conti_table[3])
-				{
-					// Tell transponder we got hit
-					DATA_HIT();
-
-					// Flash all LEDs together at 10 Hz
-					uint8_t count=0;
-					while (count<10)
-					{
-						LED1_ON(); LED2_ON();
-						safe_sleep(50);
-
-						LED1_OFF(); LED2_OFF();
-						safe_sleep(50);
-
-						// Release DATA line
-						if (count == ID)
-							DATA_IN();
-
-						count++;
-					}
-					// Turn LEDs off and return to checking FSRs and DATA
-					LED1_OFF(); LED2_OFF();
-				}
-			}
-			// If DATA Input == low
-			if (!DATA_CHK())
-			{
-				// Flash LEDs at 5 Hz in alternating pattern
-				while (1)//!DATA_CHK)
-				{
-					LED1_ON(); LED2_OFF();
-					safe_sleep(100);
-					if (DATA_CHK())
-						break;
-
-					LED1_OFF(); LED2_ON();
-					safe_sleep(100);
-					if (DATA_CHK())
-						break;
-				}
-				// Turn LEDs off and return to checking FSRs and DATA
-				LED1_OFF(); LED2_OFF();
-			}
-		}
-	}
-
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// I2C Slave Mode
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Create some variables
@@ -446,30 +362,30 @@ void loop()
 		if (hit_detect > x30_table[1])
 		{
 			// Let transponder know we got hit and compute new damage count
-			x10_table[0] |= IM_HIT;
+			x10_table[0] |= yetisI2Cdevs::IM_HIT;
 			damage += x20_table[4];
 			x10_table[1] = (damage>>0)&0xFF;
 			x10_table[2] = (damage>>8)&0xFF;
 		}
 
 
-		if (x40_table[0] & FORCE_ACTIVE)
+		if (x40_table[0] & yetisI2Cdevs::FORCE_ACTIVE)
 		{
 			control_leds(x40_table[0]);
 		}
-		else if (x10_table[0] & IM_HIT)
+		else if (x10_table[0] & yetisI2Cdevs::IM_HIT)
 		{
 			control_leds(x40_table[1]);
 		}
-		else if (x10_table[0] & OTHER_HIT)
+		else if (x10_table[0] & yetisI2Cdevs::OTHER_HIT)
 		{
 			control_leds(x40_table[2]);
 		}
-		else if (x10_table[0] & HAVE_FLAG)
+		else if (x10_table[0] & yetisI2Cdevs::HAVE_FLAG)
 		{
 			control_leds(x40_table[3]);
 		}
-		else if (x10_table[0] & AM_CAPTURING)
+		else if (x10_table[0] & yetisI2Cdevs::AM_CAPTURING)
 		{
 			control_leds(x40_table[4]);
 		}
@@ -611,17 +527,8 @@ void I2C_Rq_Event(void)
 	// If master reading status, clear IM_HIT bit
 	if (reg_addr==0x10)
 	{
-		x10_table[0] &= ~IM_HIT;
+		x10_table[0] &= ~(yetisI2Cdevs::IM_HIT);
 	}
-
-	// Send byte at current position in table
-	usiTwiTransmitByte( conti_table[conti_pos++] );
-	// Increment position on each read, and loop back to zero
-	if (conti_pos >= conti_size)
-	{
-		conti_pos = 0;
-	}
-
 
 	// No roll-over
 	if ( reg_addr < (0x00+x00_table_size) )
@@ -700,7 +607,7 @@ void I2C_Rq_Event(void)
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 volatile uint32_t millis_counter = 0;
 volatile uint32_t millis_countdown = 0;
-volatile bool milli_snoozer = FALSE;
+volatile bool milli_snoozer = false;
 
 void stopTimer0(void)
 {
@@ -841,7 +748,7 @@ void control_leds(uint8_t state)
 	uint8_t rate = state&0x07;
 	uint8_t seq = state&0x70;
 
-	if (seq == LEDS_NONE)
+	if (seq == yetisI2Cdevs::LEDS_NONE)
 		return;
 
 	uint8_t half_period = (1<<rate);
@@ -855,7 +762,7 @@ void control_leds(uint8_t state)
 		leds_top = (half_period<<1);
 	}
 
-	if (seq == LEDS_ALTERNATING)
+	if (seq == yetisI2Cdevs::LEDS_ALTERNATING)
 	{
 		leds_CH1_HI = ( 0 );
 		leds_CH1_LO = ( half_period );
@@ -863,7 +770,7 @@ void control_leds(uint8_t state)
 		leds_CH2_HI = ( half_period );
 		leds_CH2_LO = ( 0 );
 	}
-	else if (seq == LEDS_SYNCHRONOUS)
+	else if (seq == yetisI2Cdevs::LEDS_SYNCHRONOUS)
 	{
 		leds_CH1_HI = ( 0 );
 		leds_CH1_LO = ( half_period );
@@ -871,7 +778,7 @@ void control_leds(uint8_t state)
 		leds_CH2_HI = ( 0 );
 		leds_CH2_LI = ( half_period );
 	}
-	else if (seq == LEDS_FLOWING)
+	else if (seq == yetisI2Cdevs::LEDS_FLOWING)
 	{
 		leds_CH1_HI = ( 0 );
 		leds_CH1_LO = ( half_period );
@@ -879,7 +786,7 @@ void control_leds(uint8_t state)
 		leds_CH2_HI = ( (half_period>>1) );
 		leds_CH2_LO = ( (half_period>>1)+half_period );
 	}
-	else if (seq == LEDS_CH1_ONLY)
+	else if (seq == yetisI2Cdevs::LEDS_CH1_ONLY)
 	{
 		leds_CH1_HI = ( 0 );
 		leds_CH1_LO = ( half_period );
@@ -887,7 +794,7 @@ void control_leds(uint8_t state)
 		leds_CH2_HI = ( 0xFF );
 		leds_CH2_LO = ( 0 );
 	}
-	else if (seq == LEDS_CH2_ONLY)
+	else if (seq == yetisI2Cdevs::LEDS_CH2_ONLY)
 	{
 		leds_CH1_HI = ( 0xFF );
 		leds_CH1_LO = ( 0 );
@@ -895,7 +802,7 @@ void control_leds(uint8_t state)
 		leds_CH2_HI = ( 0 );
 		leds_CH2_LO = ( half_period );
 	}
-	else if (seq == LEDS_CH1S_CH2F)
+	else if (seq == yetisI2Cdevs::LEDS_CH1S_CH2F)
 	{
 		leds_CH1_HI = ( 0 );
 		leds_CH1_LO = ( 0xFF );
@@ -903,7 +810,7 @@ void control_leds(uint8_t state)
 		leds_CH2_HI = ( 0 );
 		leds_CH2_LO = ( half_period );
 	}
-	else if (seq == LEDS_CH1F_CH2S)
+	else if (seq == yetisI2Cdevs::LEDS_CH1F_CH2S)
 	{
 		leds_CH1_HI = ( 0 );
 		leds_CH1_LO = ( half_period );
@@ -933,7 +840,7 @@ void fsr_calibration(void)
 	uint8_t hit_now = 0;
 	uint8_t hit_last = 0;
 
-	control_led( (LEDS_CH1S_CH2F | FREQ_05_000Hz) );
+	control_leds( (yetisI2Cdevs::LEDS_CH1S_CH2F | yetisI2Cdevs::FREQ_4_000Hz) );
 	while( x30_table[2] == 1 )
 	{
 		hit_now = ADC_poll();
@@ -993,7 +900,7 @@ void grabFromEEPROM(void)
 	x00_table[1] = eeprom_read_byte(&eep_vhard);
 	x00_table[2] = eeprom_read_byte(&eep_vfirm);
 	tempByte = eeprom_read_byte(&eep_idOffset);
-	x00_table[3] = tempByte + YETIS_MIN_ID_LTB;
+	x00_table[3] = tempByte + yetisI2Cdevs::YETIS_MIN_ID_LTB;
 
 	x10_table[0] = 0;
 	x10_table[1] = 0;
@@ -1028,7 +935,7 @@ void saveToEEPROM(void)
 	uint8_t tempByte = 0;
 
 // Save tables to EEPROM
-	tempByte = x00_table[3] - YETIS_MIN_ID_LTB;
+	tempByte = x00_table[3] - yetisI2Cdevs::YETIS_MIN_ID_LTB;
 	eeprom_write_byte(&eep_idOffset, tempByte);
 
 	eeprom_write_byte(&eep_hit_durationL, x20_table[0]);
