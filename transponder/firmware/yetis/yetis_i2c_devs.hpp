@@ -272,8 +272,8 @@ namespace mechwarfare
 			LEDS_ALTERNATING		= 0x10,
 			LEDS_SYNCHRONOUS		= 0x20,
 			LEDS_FLOWING			= 0x30,
-			LEDS_CH1				= 0x40,
-			LEDS_CH2				= 0x50,
+			LEDS_CH1_ONLY			= 0x40,
+			LEDS_CH2_ONLY			= 0x50,
 			LEDS_CH1S_CH2F			= 0x60,
 			LEDS_CH1F_CH2S			= 0x70
 		};

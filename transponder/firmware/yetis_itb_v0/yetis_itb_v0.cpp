@@ -20,23 +20,23 @@
 
 // sudo avrdude -c usbasp -P USB -p t85 -v -U flash:w:./yetis_itb_v0.hex
 
-
 #include <stdint.h>
 #include <stdio.h>
 #include <util/delay.h>
 #include <avr/io.h>
 #include <avr/eeprom.h>
+#include <avr/interrupt.h>
 
-//#if defined(__ATtiny25__) | defined(__ATtiny45__) | defined(__ATtiny85__)
-
-//#else
-//#error 'INVALID DEVICE'
-//#endif
-
+#if defined(__AVR_ATtiny25__) | defined(__AVR_ATtiny45__) | defined(__AVR_ATtiny85__)
 #define I2C_ENABLED		1
 #include "usiTwiSlave.h"
 #include "yetis_i2c_devs.hpp"
 using namespace mechwarfare;
+
+#else
+#error 'INVALID DEVICE'
+#endif
+
 
 #ifndef YETIS_MODEL
 #define YETIS_MODEL					0x01
@@ -216,10 +216,11 @@ const uint8_t x30_table_size = sizeof(x30_table);
 */
 volatile uint8_t x40_table[] =
 {			// ADDR: NAME
-	0x00,	// 0x40: LED Hit Value						(RW) (0x00~0xFF)
-	0x00,	// 0x41: LED Flag Value						(RW) (0x00~0xFF)
-	0x00,	// 0x42: LED Capture Value					(RW) (0x00~0xFF)
-	0x00	// 0x43: LED State							(RW) (0x00~0xFF)
+	0x00,	// 0x40: LED State							(RW) (0x00~0xFF)
+	0x00,	// 0x41: LED IM_HIT Value					(RW) (0x00~0xFF)
+	0x00,	// 0x42: LED OTHER_HIT Value				(RW) (0x00~0xFF)
+	0x00,	// 0x43: LED HAVE_FLAG Value				(RW) (0x00~0xFF)
+	0x00	// 0x44: LED AM_CAPTURING Value				(RW) (0x00~0xFF)
 };
 const uint8_t x40_table_size = sizeof(x40_table);
 
@@ -249,10 +250,11 @@ const uint8_t x40_table_size = sizeof(x40_table);
 /*
 volatile uint8_t x50_table[] =
 {			// ADDR: NAME
-	0x00,	// 0x50: Buzzer Hit Value					(RW) (0x00~0xFF)
-	0x00,	// 0x51: Buzzer Flag Value					(RW) (0x00~0xFF)
-	0x00,	// 0x52: Buzzer Capture Value				(RW) (0x00~0xFF)
-	0x00	// 0x53: Buzzer State						(RW) (0x00~0xFF)
+	0x00,	// 0x50: Buzzer State						(RW) (0x00~0xFF)
+	0x00,	// 0x51: Buzzer IM_HIT Value				(RW) (0x00~0xFF)
+	0x00,	// 0x52: Buzzer OTHER_HIT Value				(RW) (0x00~0xFF)
+	0x00,	// 0x53: Buzzer HAVE_FLAG Value				(RW) (0x00~0xFF)
+	0x00	// 0x54: Buzzer AM_CAPTURING Value			(RW) (0x00~0xFF)
 };
 const uint8_t x50_table_size = sizeof(x50_table);
 */
@@ -268,6 +270,34 @@ volatile uint8_t reg_addr = 0x00;
 
 // Tracks whether to start a conversion cycle
 volatile bool start_conversion = false;
+
+
+
+void setup();
+void loop();
+
+uint8_t ADC_poll(void);
+
+void I2C_Stop_Check(void);
+void I2C_Rx_Event(uint8_t nBytes);
+void I2C_Rq_Event(void);
+
+void stopTimer0(void);
+void configTimer0_millis(void);
+uint32_t millis(void);
+void safe_sleep(uint32_t snooze_ms);
+
+void stopTimer1(void);
+void configTimer1(void);
+void control_leds(uint8_t state);
+
+void fsr_calibration(void);
+void grabFromEEPROM(void);
+void saveToEEPROM(void);
+
+
+
+
 
 
 void setup()
@@ -446,7 +476,7 @@ void I2C_Rx_Event(uint8_t nBytes)
 
 	// Get write address
 	reg_addr = usiTwiReceiveByte();
-
+	uint8_t more_garbage = 0;
 	nBytes--;
 	while(nBytes--)
 	{
@@ -461,7 +491,7 @@ void I2C_Rx_Event(uint8_t nBytes)
 		else if ( reg_addr < 0x20 )
 		{
 			// Discard excess data
-			uint8_t more_garbage = usiTwiReceiveByte();
+			more_garbage = usiTwiReceiveByte();
 			reg_addr++;
 		}
 		else if ( reg_addr < (0x20+x20_table_size) )
@@ -473,7 +503,7 @@ void I2C_Rx_Event(uint8_t nBytes)
 		else if ( reg_addr < 0x30 )
 		{
 			// Discard excess data
-			uint8_t more_garbage = usiTwiReceiveByte();
+			more_garbage = usiTwiReceiveByte();
 			reg_addr++;
 		}
 		else if ( reg_addr < (0x30+x30_table_size) )
@@ -485,7 +515,7 @@ void I2C_Rx_Event(uint8_t nBytes)
 		else if ( reg_addr < 0x40 )
 		{
 			// Discard excess data
-			uint8_t more_garbage = usiTwiReceiveByte();
+			more_garbage = usiTwiReceiveByte();
 			reg_addr++;
 		}
 		else if ( reg_addr < (0x40+x40_table_size) )
@@ -497,7 +527,7 @@ void I2C_Rx_Event(uint8_t nBytes)
 		else if ( reg_addr < 0x50 )
 		{
 			// Discard excess data
-			uint8_t more_garbage = usiTwiReceiveByte();
+			more_garbage = usiTwiReceiveByte();
 			reg_addr++;
 		}
 /*		
@@ -510,14 +540,14 @@ void I2C_Rx_Event(uint8_t nBytes)
 		else if ( reg_addr < 0x60 )
 		{
 			// Discard excess data
-			uint8_t more_garbage = usiTwiReceiveByte();
+			more_garbage = usiTwiReceiveByte();
 			reg_addr++;
 		}
 */
 		else
 		{
 			// Discard excess data
-			uint8_t more_garbage = usiTwiReceiveByte();
+			more_garbage = usiTwiReceiveByte();
 		}
 	}
 }
@@ -647,7 +677,7 @@ ISR(TIMER0_OVF_vect)
 		if (millis_countdown>0)
 			millis_countdown--;
 		else
-			milli_snoozer = FALSE;
+			milli_snoozer = false;
 	}
 }
 
@@ -667,7 +697,7 @@ uint32_t millis(void)
 void safe_sleep(uint32_t snooze_ms)
 {
 	millis_countdown = snooze_ms;
-	milli_snoozer = TRUE;
+	milli_snoozer = true;
 	while(milli_snoozer);
 }
 
@@ -682,7 +712,7 @@ volatile uint8_t leds_CH1_HI = 0;
 volatile uint8_t leds_CH1_LO = 0;
 volatile uint8_t leds_CH2_HI = 0;
 volatile uint8_t leds_CH2_LO = 0;
-volatile bool leds_active = FALSE;
+volatile bool leds_active = false;
 
 void stopTimer1(void)
 {
@@ -714,25 +744,41 @@ void configTimer1(void)
 ISR(TIMER1_OVF_vect)
 {
 	if (!leds_active)
+	{
 		return;
+	}
 
 	if (leds_top == 0xFF)
+	{
 		leds_active = false;
+	}
 
 	if ( leds_count == leds_CH1_HI )
+	{
 		LED1_ON();
+	}
 	else if (leds_count == leds_CH1_LO)
+	{
 		LED1_OFF();
+	}
 
 	if ( leds_count == leds_CH2_HI )
+	{
 		LED2_ON();
+	}
 	else if (leds_count == leds_CH2_LO)
+	{
 		LED2_OFF();
+	}
 
 	if (leds_count < leds_top)
+	{
 		leds_count++;
+	}
 	else
+	{
 		leds_count = 0;
+	}
 }
 
 void control_leds(uint8_t state)
@@ -776,7 +822,7 @@ void control_leds(uint8_t state)
 		leds_CH1_LO = ( half_period );
 
 		leds_CH2_HI = ( 0 );
-		leds_CH2_LI = ( half_period );
+		leds_CH2_LO = ( half_period );
 	}
 	else if (seq == yetisI2Cdevs::LEDS_FLOWING)
 	{
@@ -881,9 +927,9 @@ void fsr_calibration(void)
 	{
 		while(1)
 		{
-			LED1_ON(); LED2_OFF;
+			LED1_ON(); LED2_OFF();
 			safe_sleep(25);
-			LED1_OFF(); LED2_ON;
+			LED1_OFF(); LED2_ON();
 			safe_sleep(25);
 			
 		}

@@ -1,14 +1,21 @@
 #~~~~~~~~~~~~~~~~~~~~ Output File Name ~~~~~~~~~~~~~~~~~~~~
-MAIN_OUT = yetis_itb_v0
+PROJECT_NAME = yetis_itb_v0
 
 #~~~~~~~~~~~~~~~~~~~~ Source Files ~~~~~~~~~~~~~~~~~~~~
-MAIN_SRCC = \
+SRCS = \
 	yetis_itb_v0.cpp \
 	usiTwiSlave.c
 
-MAIN_SRCCPP = 
+#~~~~~~~~~~~~~~~~~~~~ Object Files ~~~~~~~~~~~~~~~~~~~~
+BINDIR = bin
+OBJDIR = obj
 
-MAIN_SRCASM = 
+TARGET = $(BINDIR)/$(PROJECT_NAME)
+
+CSRCS = $(filter %.c,$(SRCS))
+CPPSRCS = $(filter %.cpp,$(SRCS))
+RAWOBJS = $(CSRCS:.c=.c.o) $(CPPSRCS:.cpp=.cpp.o)
+TARGET_OBJS = $(addprefix $(OBJDIR)/,$(RAWOBJS))
 
 #~~~~~~~~~~~~~~~~~~~~ Include Directories ~~~~~~~~~~~~~~~~~~~~
 INCLUDE_DIRS = -I. -I../yetis
@@ -221,28 +228,23 @@ MSG_CREATING_LIBRARY = Creating library:
 
 
 #~~~~~~~~~~~~~~~~~~~~ Linked Files ~~~~~~~~~~~~~~~~~~~~
-MAIN_OUT_ELF = $(MAIN_OUT).elf
-MAIN_OUT_HEX = $(MAIN_OUT).hex
-MAIN_OUT_EEP = $(MAIN_OUT).eep
-MAIN_OUT_LSS = $(MAIN_OUT).lss
-MAIN_OUT_SYM = $(MAIN_OUT).sym
+TARGET_ELF = $(TARGET).elf
+TARGET_HEX = $(TARGET).hex
+TARGET_EEP = $(TARGET).eep
+TARGET_LSS = $(TARGET).lss
+TARGET_SYM = $(TARGET).sym
 
-#~~~~~~~~~~~~~~~~~~~~ Object Files ~~~~~~~~~~~~~~~~~~~~
-MAIN_OBJS = \
-	$(MAIN_SRCC:%.c=%.o) \
-	$(MAIN_SRCCPP:%.cpp=%.o) \
-	$(MAIN_SRCASM:%.s=%.o)
 
 #~~~~~~~~~~~~~~~~~~~~ all ~~~~~~~~~~~~~~~~~~~~
 all: begin gccversion sizebefore build sizeafter end
 
 #~~~~~~~~~~~~~~~~~~~~ build ~~~~~~~~~~~~~~~~~~~~
 build: \
-	$(MAIN_OUT_ELF) \
-	$(MAIN_OUT_HEX) \
-	$(MAIN_OUT_EEP) \
-	$(MAIN_OUT_LSS) \
-	$(MAIN_OUT_SYM)
+	$(TARGET_ELF) \
+	$(TARGET_HEX) \
+	$(TARGET_EEP) \
+	$(TARGET_LSS) \
+	$(TARGET_SYM)
 
 #~~~~~~~~~~~~~~~~~~~~ Eye candy ~~~~~~~~~~~~~~~~~~~~
 begin:
@@ -254,17 +256,17 @@ end:
 	@echo
 
 sizebefore:
-	@if test -f $(MAIN_OUT_ELF); then echo; \
+	@if test -f $(TARGET_ELF); then echo; \
 	echo $(MSG_SIZE_BEFORE);                \
-	$(SIZE) $(MAIN_OUT_ELF);                \
-	$(SIZE) --target=ihex $(MAIN_OUT_HEX);  \
+	$(SIZE) $(TARGET_ELF);                \
+	$(SIZE) --target=ihex $(TARGET_HEX);  \
 	2>/dev/null; echo; fi
 
 sizeafter:
-	@if test -f $(MAIN_OUT_ELF); then echo; \
+	@if test -f $(TARGET_ELF); then echo; \
 	echo $(MSG_SIZE_AFTER);                 \
-	$(SIZE) $(MAIN_OUT_ELF);                \
-	$(SIZE) --target=ihex $(MAIN_OUT_HEX);  \
+	$(SIZE) $(TARGET_ELF);                \
+	$(SIZE) --target=ihex $(TARGET_HEX);  \
 	2>/dev/null; echo; fi
 
 gccversion : 
@@ -298,9 +300,9 @@ gccversion :
 
 #~~~~~~~~~~~~~~~~~~~~ Linking ~~~~~~~~~~~~~~~~~~~~
 # Link: create ELF output file from object files.
-.SECONDARY : $(MAIN_OUT_ELF)
-.PRECIOUS : $(MAIN_OBJS)
-%.elf: $(MAIN_OBJS)
+.SECONDARY : $(TARGET_ELF)
+.PRECIOUS : $(TARGET_OBJS)
+%.elf: $(TARGET_OBJS)
 	@echo
 	@echo $(MSG_LINKING) $@
 	$(LD) $(CFLAGS) $^ --output $@ $(LDFLAGS)
@@ -346,16 +348,20 @@ clean: begin clean_list end
 clean_list :
 	@echo
 	@echo $(MSG_CLEANING)
-	$(REMOVE) $(MAIN_OUT_HEX)
-	$(REMOVE) $(MAIN_OUT_ELF)
-	$(REMOVE) $(MAIN_OUT_ELF).map
-	$(REMOVE) $(MAIN_OUT_LSS)
-	$(REMOVE) $(MAIN_OUT_EEP)
-	$(REMOVE) $(MAIN_OUT_SYM)
-	$(REMOVEDIR) .dep
-	$(REMOVE) $(MAIN_OBJS)
-	$(REMOVE) $(MAIN_OBJS:%.o=%.lst)
+#	$(REMOVE) $(TARGET_HEX)
+#	$(REMOVE) $(TARGET_ELF)
+#	$(REMOVE) $(TARGET_ELF).map
+#	$(REMOVE) $(TARGET_LSS)
+#	$(REMOVE) $(TARGET_EEP)
+#	$(REMOVE) $(TARGET_SYM)
+#	$(REMOVEDIR) .dep
+#	$(REMOVE) $(TARGET_OBJS)
+#	$(REMOVE) $(TARGET_OBJS:%.o=%.lst)
+	rm -f $(OBJS)
+	rm -f $(TARGET)
+	rm -rf $(OBJDIR)
+	rm -rf $(BINDIR)
 
 #~~~~~~~~~~~~~~~~~~~~ backup ~~~~~~~~~~~~~~~~~~~~
 backup: clean
-	tar cJvf ../$(MAIN_OUT)_`date +"%Y-%m-%d_%H%M"`.tar.xz *
+	tar cJvf ../$(TARGET)_`date +"%Y-%m-%d_%H%M"`.tar.xz *
