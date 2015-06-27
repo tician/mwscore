@@ -39,7 +39,7 @@ using namespace mechwarfare;
 
 
 #ifndef YETIS_MODEL
-#define YETIS_MODEL					0x01
+#define YETIS_MODEL					yetisI2Cdevs::YETIS_MODEL_LTB
 #endif
 #ifndef YETIS_HARDWARE_REVISION
 #define YETIS_HARDWARE_REVISION		0
@@ -247,7 +247,7 @@ const uint8_t x40_table_size = sizeof(x40_table);
 				110	RISING
 				111	FALLING
 */
-/*
+#ifdef (YETIS_MODEL == yetisI2Cdevs::YETIS_MODEL_LSB)
 volatile uint8_t x50_table[] =
 {			// ADDR: NAME
 	0x00,	// 0x50: Buzzer State						(RW) (0x00~0xFF)
@@ -257,7 +257,7 @@ volatile uint8_t x50_table[] =
 	0x00	// 0x54: Buzzer AM_CAPTURING Value			(RW) (0x00~0xFF)
 };
 const uint8_t x50_table_size = sizeof(x50_table);
-*/
+#endif
 /*
 volatile uint8_t x60_table[] =
 {			// ADDR: NAME
@@ -302,13 +302,6 @@ void saveToEEPROM(void);
 
 void setup()
 {
-#if defined(__ATtiny13A__)
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Change Main Clock Divisor to 1 (9.6MHz)
-	CLKPR = (1<<CLKPCE);
-	CLKPR = 0;
-#endif
-
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	grabFromEEPROM();
 
@@ -320,7 +313,7 @@ void setup()
 	// Disable PB3/ADC3 pull-up (use 10k external pull-up)
 	PORTB &= ~(1<<PIN3);
 
-#if (YETIS_MODEL == 0x01)
+#if (YETIS_MODEL == yetisI2Cdevs::YETIS_MODEL_LTB)
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ADC Setup for normal usage
 	// Use Vcc as reference, Left Adjust Result, Select ADC3
