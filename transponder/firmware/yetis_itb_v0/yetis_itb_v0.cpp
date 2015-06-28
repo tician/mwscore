@@ -127,7 +127,8 @@ uint8_t EEMEM eep_dph_value = 1;	// [damage per hit]
 uint8_t EEMEM eep_fsr_sdph = 5;	// Sequential ADC Detections Per Hit
 uint8_t EEMEM eep_fsr_threshold = 230;	// ADC Threshold for Detection
 
-uint8_t EEMEM eep_leds_hit = (yetisI2Cdevs::LEDS_ALTERNATING | yetisI2Cdevs::FREQ_8_000Hz);
+uint8_t EEMEM eep_leds_im_hit = (yetisI2Cdevs::LEDS_ALTERNATING | yetisI2Cdevs::FREQ_8_000Hz);
+uint8_t EEMEM eep_leds_other_hit = (yetisI2Cdevs::LEDS_SYNCHRONOUS | yetisI2Cdevs::FREQ_8_000Hz);
 uint8_t EEMEM eep_leds_flag = (yetisI2Cdevs::LEDS_SYNCHRONOUS | yetisI2Cdevs::FREQ_4_000Hz);
 uint8_t EEMEM eep_leds_cap = (yetisI2Cdevs::LEDS_FLOWING | yetisI2Cdevs::FREQ_4_000Hz);
 
@@ -247,7 +248,7 @@ const uint8_t x40_table_size = sizeof(x40_table);
 				110	RISING
 				111	FALLING
 */
-#ifdef (YETIS_MODEL == yetisI2Cdevs::YETIS_MODEL_LSB)
+/*
 volatile uint8_t x50_table[] =
 {			// ADDR: NAME
 	0x00,	// 0x50: Buzzer State						(RW) (0x00~0xFF)
@@ -257,7 +258,7 @@ volatile uint8_t x50_table[] =
 	0x00	// 0x54: Buzzer AM_CAPTURING Value			(RW) (0x00~0xFF)
 };
 const uint8_t x50_table_size = sizeof(x50_table);
-#endif
+*/
 /*
 volatile uint8_t x60_table[] =
 {			// ADDR: NAME
@@ -282,6 +283,10 @@ void I2C_Stop_Check(void);
 void I2C_Rx_Event(uint8_t nBytes);
 void I2C_Rq_Event(void);
 
+
+volatile uint16_t millis_im_hit = 0;
+volatile uint16_t millis_standoff = 0;
+volatile uint16_t millis_other_hit = 0;
 void stopTimer0(void);
 void configTimer0_millis(void);
 uint32_t millis(void);
@@ -289,7 +294,7 @@ void safe_sleep(uint32_t snooze_ms);
 
 void stopTimer1(void);
 void configTimer1(void);
-void control_leds(uint8_t state);
+void update_leds(void);
 
 void fsr_calibration(void);
 void grabFromEEPROM(void);
@@ -313,7 +318,6 @@ void setup()
 	// Disable PB3/ADC3 pull-up (use 10k external pull-up)
 	PORTB &= ~(1<<PIN3);
 
-#if (YETIS_MODEL == yetisI2Cdevs::YETIS_MODEL_LTB)
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ADC Setup for normal usage
 	// Use Vcc as reference, Left Adjust Result, Select ADC3
@@ -335,12 +339,12 @@ void setup()
 	uint8_t garbage = ADCH;
 */
 	ADC_poll();
-#else
+/*
 	// Set PB3 output (BUZZER output enabled)
 	DDRB |= (1<<PIN3);
 	// Set PB3 low (BUZZER OFF)
 	PORTB &= ~(1<<PIN3);
-#endif
+*/
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// Set I2C event functions
@@ -394,58 +398,10 @@ void loop()
 
 				hit_detect = 0;
 				millis_im_hit = (x20_table[0]<<0) + (x20_table[1]<<8) + 1;
-				control_leds(x40_table[1]);
-				millis_standoff = (x20_table[2]<<0) + (x20_table[3]<<8) + 1;
+				update_leds();
+				millis_standoff = (x20_table[2]<<0) + (x20_table[3]<<8);
 			}
 		}
-
-
-/*
-		// Server forcing LEDs active with a sequence
-		if (x40_table[0] & yetisI2Cdevs::FORCE_ACTIVE)
-		{
-			x40_table[0] &= ~(yetisI2Cdevs::FORCE_ACTIVE);
-			control_leds(x40_table[0]);
-		}
-*/
-		if (millis_im_hit == 1)
-		{
-			millis_im_hit = 0;
-			if (millis_other_hit > 1)
-			{
-				// switch back to OTHER_HIT LED sequence
-				control_leds(x40_table[2]);
-			}
-			else if (x10_table[0] & yetisI2Cdevs::HAVE_FLAG)
-			{
-				//nada
-			}
-			else if (x10_table[0] & yetisI2Cdevs::AM_CAPTURING)
-			{
-				//nada
-			}
-			else
-			{
-				control_leds(0);
-			}
-		}
-		if (millis_other_hit == 1)
-		{
-			millis_other_hit = 0;
-			if (x10_table[0] & yetisI2Cdevs::HAVE_FLAG)
-			{
-				//nada
-			}
-			else if (x10_table[0] & yetisI2Cdevs::AM_CAPTURING)
-			{
-				//nada
-			}
-			else
-			{
-				control_leds(0);
-			}
-		}
-
 	}	// while(1)
 
 }	// loop()
@@ -522,53 +478,42 @@ void I2C_Rx_Event(uint8_t nBytes)
 		}
 		else if ( reg_addr < (0x10+1) )//x10_table_size) )
 		{
-			uint8_t old_status = x10_table[0] & (yetisI2Cdevs::OTHER_HIT | yetisI2Cdevs::HAVE_FLAG | yetisI2Cdevs::AM_CAPTURING);
-			uint8_t new_status = usiTwiReceiveByte();
+			more_garbage = usiTwiReceiveByte();
 			reg_addr++;
 
-			if (new_status & (yetisI2Cdevs::SAVE_TO_EEPROM) )
+			if ( more_garbage & (yetisI2Cdevs::SAVE_TO_EEPROM) )
 			{
 				saveToEEPROM();
 			}
-			if (new_status & (yetisI2Cdevs::REBOOT) )
+			if ( more_garbage & (yetisI2Cdevs::REBOOT) )
 			{
 				//cli();
 				//reboot using wdt;
 			}
+			more_garbage &= ( (yetisI2Cdevs::OTHER_HIT) | (yetisI2Cdevs::HAVE_FLAG) | (yetisI2Cdevs::AM_CAPTURING) );
 
-			new_status &= (yetisI2Cdevs::OTHER_HIT | yetisI2Cdevs::HAVE_FLAG | yetisI2Cdevs::AM_CAPTURING);
-
-			if ( old_status != new_status )
+			if ( more_garbage & (yetisI2Cdevs::OTHER_HIT) )
 			{
-				// handle LED changes
-				if (millis_im_hit > 1)
+				millis_other_hit = (x20_table[0]<<0) + (x20_table[1]<<8) + 1;
+				// actual change in LED sequence may be occurring
+				if ( !( x10_table[0] & (yetisI2Cdevs::OTHER_HIT) ) )
 				{
-					// still handling IM_HIT
-				}
-				else if (millis_other_hit > 1)
-				{
-					// still handling old OTHER_HIT
-				}
-				else if (new_status & yetisI2Cdevs::OTHER_HIT)
-				{
-					control_leds(x40_table[2]);
-					millis_other_hit = (x20_table[0]<<0) + (x20_table[1]<<8) + 1;
-				}
-				else if (new_status & yetisI2Cdevs::HAVE_FLAG)
-				{
-					control_leds(x40_table[3]);
-				}
-				else if (new_status & yetisI2Cdevs::AM_CAPTURING)
-				{
-					control_leds(x40_table[4]);
-				}
-				else
-				{
-					control_leds(0);
+					update_leds();
 				}
 			}
+			// actual change in LED sequence may be occurring
+			if ( (more_garbage & (yetisI2Cdevs::HAVE_FLAG) ) != (x10_table[0] & (yetisI2Cdevs::HAVE_FLAG) ) )
+			{
+				update_leds();
+			}
+			// actual change in LED sequence may be occurring
+			if ( (more_garbage & (yetisI2Cdevs::AM_CAPTURING) ) != (x10_table[0] & (yetisI2Cdevs::AM_CAPTURING) ) )
+			{
+				update_leds();
+			}
+
 			x10_table[0] &= yetisI2Cdevs::IM_HIT;
-			x10_table[0] |= new_status;
+			x10_table[0] |= more_garbage;
 		}
 		else if ( reg_addr < 0x20 )
 		{
@@ -604,6 +549,10 @@ void I2C_Rx_Event(uint8_t nBytes)
 		{
 			// Save new LED values to table
 			x40_table[(reg_addr&0x0F)] = usiTwiReceiveByte();
+			if (reg_addr==0x40)
+			{
+				update_leds();
+			}
 			reg_addr++;
 		}
 		else if ( reg_addr < 0x50 )
@@ -650,13 +599,12 @@ void I2C_Rq_Event(void)
 	if ( reg_addr < (0x10+x10_table_size) )
 	{
 		usiTwiTransmitByte( x10_table[(reg_addr&0x0F)] );
-		reg_addr++;
-
 		// If master reading status, clear IM_HIT bit
 		if (reg_addr==0x10)
 		{
 			x10_table[0] &= ~(yetisI2Cdevs::IM_HIT);
 		}
+		reg_addr++;
 	}
 	else if ( reg_addr < 0x20 )
 	{
@@ -719,9 +667,6 @@ void I2C_Rq_Event(void)
 volatile uint32_t millis_counter = 0;
 volatile uint32_t millis_countdown = 0;
 volatile bool milli_snoozer = false;
-volatile uint16_t millis_im_hit = 0;
-volatile uint16_t millis_standoff = 0;
-volatile uint16_t millis_other_hit = 0;
 
 void stopTimer0(void)
 {
@@ -765,12 +710,28 @@ ISR(TIMER0_OVF_vect)
 	}
 
 	if (millis_standoff>0)
+	{
 		millis_standoff--;
+	}
 
 	if (millis_im_hit>1)
+	{
 		millis_im_hit--;
+	}
+	else if (millis_im_hit==1)
+	{
+		millis_im_hit--;
+		update_leds();
+	}
 	if (millis_other_hit>1)
+	{
 		millis_other_hit--;
+	}
+	else if (millis_other_hit==1)
+	{
+		millis_other_hit--;
+		update_leds();
+	}
 }
 
 uint32_t millis(void)
@@ -820,7 +781,6 @@ void configTimer1(void)
 	stopTimer1();
 
 	// 8.0e6/(4096*122) = 16Hz
-//	OCR1A = 121;
 	OCR1C = 121;
 
 	// Enable OVF interrupt
@@ -873,8 +833,40 @@ ISR(TIMER1_OVF_vect)
 	}
 }
 
-void control_leds(uint8_t state)
+void update_leds(void)
 {
+	uint8_t bot_state = x10_table[0];
+	uint8_t led_state = x40_table[0];
+
+	if ( !(led_state & (yetisI2Cdevs::FORCE_ACTIVE) ) )
+	{
+		if (millis_im_hit>1)
+		{
+			led_state = x40_table[1];
+		}
+		else if (millis_other_hit>1 )
+		{
+			led_state = x40_table[2];
+		}
+		else if (bot_state & (yetisI2Cdevs::HAVE_FLAG) )
+		{
+			led_state = x40_table[3];
+		}
+		else if (bot_state & (yetisI2Cdevs::AM_CAPTURING) )
+		{
+			led_state = x40_table[4];
+		}
+		else
+		{
+			led_state = 0;
+		}
+	}
+	else
+	{
+		//override any other state with x40_table[0]/LED_STATE
+	}
+
+// Reset to a known state
 	LED1_OFF();
 	LED2_OFF();
 
@@ -883,8 +875,8 @@ void control_leds(uint8_t state)
 	leds_top = 0xFF;
 
 // handle actual LED switching in ISR(TIMER1_OVF_vect)
-	uint8_t rate = state&0x07;
-	uint8_t seq = state&0x70;
+	uint8_t rate = led_state&0x07;
+	uint8_t seq = led_state&0x70;
 
 	if (seq == yetisI2Cdevs::LEDS_NONE)
 		return;
@@ -978,7 +970,10 @@ void fsr_calibration(void)
 	uint8_t hit_now = 0;
 	uint8_t hit_last = 0;
 
-	control_leds( (yetisI2Cdevs::LEDS_CH1S_CH2F | yetisI2Cdevs::FREQ_4_000Hz) );
+//	control_leds( (yetisI2Cdevs::LEDS_CH1S_CH2F | yetisI2Cdevs::FREQ_4_000Hz) );
+	x40_table[0] = (yetisI2Cdevs::LEDS_CH1S_CH2F | yetisI2Cdevs::FREQ_4_000Hz | yetisI2Cdevs::FORCE_ACTIVE);
+	update_leds();
+
 	while( x30_table[2] == 1 )
 	{
 		hit_now = ADC_poll();
@@ -1003,7 +998,8 @@ void fsr_calibration(void)
 		}
 		safe_sleep(1);
 	}
-
+	x40_table[0] = 0;
+	update_leds();
 
 	uint32_t tempThreshold=0;
 	for (iter=0; iter<20; iter++)
@@ -1023,7 +1019,6 @@ void fsr_calibration(void)
 			safe_sleep(25);
 			LED1_OFF(); LED2_ON();
 			safe_sleep(25);
-			
 		}
 	}
 }
@@ -1054,10 +1049,11 @@ void grabFromEEPROM(void)
 	x30_table[1] = eeprom_read_byte(&eep_fsr_threshold);
 	x30_table[2] = 0;
 
-	x40_table[0] = eeprom_read_byte(&eep_leds_hit);
-	x40_table[1] = eeprom_read_byte(&eep_leds_flag);
-	x40_table[2] = eeprom_read_byte(&eep_leds_cap);
-	x40_table[3] = 0;
+	x40_table[0] = 0;
+	x40_table[1] = eeprom_read_byte(&eep_leds_im_hit);
+	x40_table[1] = eeprom_read_byte(&eep_leds_other_hit);
+	x40_table[3] = eeprom_read_byte(&eep_leds_flag);
+	x40_table[4] = eeprom_read_byte(&eep_leds_cap);
 
 /*
 	x50_table[0] = eeprom_read_byte(&eep_buzz_hit);
@@ -1085,9 +1081,10 @@ void saveToEEPROM(void)
 	eeprom_write_byte(&eep_fsr_sdph, x30_table[0]);
 	eeprom_write_byte(&eep_fsr_threshold, x30_table[1]);
 
-	eeprom_write_byte(&eep_leds_hit, x40_table[0]);
-	eeprom_write_byte(&eep_leds_flag, x40_table[1]);
-	eeprom_write_byte(&eep_leds_cap, x40_table[2]);
+	eeprom_write_byte(&eep_leds_im_hit, x40_table[1]);
+	eeprom_write_byte(&eep_leds_other_hit, x40_table[2]);
+	eeprom_write_byte(&eep_leds_flag, x40_table[3]);
+	eeprom_write_byte(&eep_leds_cap, x40_table[3]);
 
 /*
 	eeprom_write_byte(&eep_buzz_hit, x50_table[0]);
