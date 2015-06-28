@@ -363,26 +363,12 @@ void loop()
 	uint8_t hit_detect = 0;
 	uint16_t damage = 0;
 
-	uint32_t temp_millis = 0;
-	uint32_t im_hit_millis = 0;
-	uint32_t standoff_millis = 0;
-	uint8_t status = x10_table[0];
-
 // Set device address
 	usiTwiSlaveInit(x00_table[3]);
 
 	while(1)
 	{
-		temp_millis = millis();
-
-		if (temp_millis > im_hit_millis)
-		{
-			control_leds(0);
-			im_hit_millis = 0;
-			
-		}
-
-		if (standoff_millis == 0)
+		if (millis_standoff == 0)
 		{
 			// Rolling average to cut down on noise
 			fsr = ((fsr + ADC_poll())>>1);
@@ -407,55 +393,57 @@ void loop()
 				x10_table[2] = (damage>>8)&0xFF;
 
 				hit_detect = 0;
-				im_hit_millis = temp_millis + (x20_table[0]<<0) + (x20_table[1]<<8);
-				standoff_millis = temp_millis + (x20_table[2]<<0) + (x20_table[3]<<8);
+				millis_im_hit = (x20_table[0]<<0) + (x20_table[1]<<8) + 1;
+				control_leds(x40_table[1]);
+				millis_standoff = (x20_table[2]<<0) + (x20_table[3]<<8) + 1;
 			}
 		}
-		else if (temp_millis > standoff_millis)
-		{
-			control_leds(0);
-			standoff_millis = 0;
-		}
 
+
+/*
 		// Server forcing LEDs active with a sequence
 		if (x40_table[0] & yetisI2Cdevs::FORCE_ACTIVE)
 		{
 			x40_table[0] &= ~(yetisI2Cdevs::FORCE_ACTIVE);
 			control_leds(x40_table[0]);
 		}
-
-
-
-		// Have changed status since last transit through while(1)?
-		if (status == x10_table[0])
+*/
+		if (millis_im_hit == 1)
 		{
-			continue;
+			millis_im_hit = 0;
+			if (millis_other_hit > 1)
+			{
+				// switch back to OTHER_HIT LED sequence
+				control_leds(x40_table[2]);
+			}
+			else if (x10_table[0] & yetisI2Cdevs::HAVE_FLAG)
+			{
+				//nada
+			}
+			else if (x10_table[0] & yetisI2Cdevs::AM_CAPTURING)
+			{
+				//nada
+			}
+			else
+			{
+				control_leds(0);
+			}
 		}
-		else	// 'just set IM_HIT', 'IM_HIT cleared by master read',
-				// or have other state change by server/transponder
+		if (millis_other_hit == 1)
 		{
-			status = x10_table[0];
-		}
-
-		if (status & yetisI2Cdevs::IM_HIT)
-		{
-			control_leds(x40_table[1]);
-		}
-		else if (status & yetisI2Cdevs::OTHER_HIT)
-		{
-			control_leds(x40_table[2]);
-		}
-		else if (status & yetisI2Cdevs::HAVE_FLAG)
-		{
-			control_leds(x40_table[3]);
-		}
-		else if (status & yetisI2Cdevs::AM_CAPTURING)
-		{
-			control_leds(x40_table[4]);
-		}
-		else
-		{
-			control_leds(0);
+			millis_other_hit = 0;
+			if (x10_table[0] & yetisI2Cdevs::HAVE_FLAG)
+			{
+				//nada
+			}
+			else if (x10_table[0] & yetisI2Cdevs::AM_CAPTURING)
+			{
+				//nada
+			}
+			else
+			{
+				control_leds(0);
+			}
 		}
 
 	}	// while(1)
@@ -526,6 +514,62 @@ void I2C_Rx_Event(uint8_t nBytes)
 				x00_table[3] = usiTwiReceiveByte();
 			reg_addr++;
 		}
+		else if ( reg_addr < 0x10 )
+		{
+			// Discard excess data
+			more_garbage = usiTwiReceiveByte();
+			reg_addr++;
+		}
+		else if ( reg_addr < (0x10+1) )//x10_table_size) )
+		{
+			uint8_t old_status = x10_table[0] & (yetisI2Cdevs::OTHER_HIT | yetisI2Cdevs::HAVE_FLAG | yetisI2Cdevs::AM_CAPTURING);
+			uint8_t new_status = usiTwiReceiveByte();
+			reg_addr++;
+
+			if (new_status & (yetisI2Cdevs::SAVE_TO_EEPROM) )
+			{
+				saveToEEPROM();
+			}
+			if (new_status & (yetisI2Cdevs::REBOOT) )
+			{
+				//cli();
+				//reboot using wdt;
+			}
+
+			new_status &= (yetisI2Cdevs::OTHER_HIT | yetisI2Cdevs::HAVE_FLAG | yetisI2Cdevs::AM_CAPTURING);
+
+			if ( old_status != new_status )
+			{
+				// handle LED changes
+				if (millis_im_hit > 1)
+				{
+					// still handling IM_HIT
+				}
+				else if (millis_other_hit > 1)
+				{
+					// still handling old OTHER_HIT
+				}
+				else if (new_status & yetisI2Cdevs::OTHER_HIT)
+				{
+					control_leds(x40_table[2]);
+					millis_other_hit = (x20_table[0]<<0) + (x20_table[1]<<8) + 1;
+				}
+				else if (new_status & yetisI2Cdevs::HAVE_FLAG)
+				{
+					control_leds(x40_table[3]);
+				}
+				else if (new_status & yetisI2Cdevs::AM_CAPTURING)
+				{
+					control_leds(x40_table[4]);
+				}
+				else
+				{
+					control_leds(0);
+				}
+			}
+			x10_table[0] &= yetisI2Cdevs::IM_HIT;
+			x10_table[0] |= new_status;
+		}
 		else if ( reg_addr < 0x20 )
 		{
 			// Discard excess data
@@ -592,12 +636,6 @@ void I2C_Rx_Event(uint8_t nBytes)
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void I2C_Rq_Event(void)
 {
-	// If master reading status, clear IM_HIT bit
-	if (reg_addr==0x10)
-	{
-		x10_table[0] &= ~(yetisI2Cdevs::IM_HIT);
-	}
-
 	// No roll-over
 	if ( reg_addr < (0x00+x00_table_size) )
 	{
@@ -613,6 +651,12 @@ void I2C_Rq_Event(void)
 	{
 		usiTwiTransmitByte( x10_table[(reg_addr&0x0F)] );
 		reg_addr++;
+
+		// If master reading status, clear IM_HIT bit
+		if (reg_addr==0x10)
+		{
+			x10_table[0] &= ~(yetisI2Cdevs::IM_HIT);
+		}
 	}
 	else if ( reg_addr < 0x20 )
 	{
@@ -665,7 +709,6 @@ void I2C_Rq_Event(void)
 	{
 		usiTwiTransmitByte( 0x00 );
 	}
-
 }
 
 
@@ -676,6 +719,9 @@ void I2C_Rq_Event(void)
 volatile uint32_t millis_counter = 0;
 volatile uint32_t millis_countdown = 0;
 volatile bool milli_snoozer = false;
+volatile uint16_t millis_im_hit = 0;
+volatile uint16_t millis_standoff = 0;
+volatile uint16_t millis_other_hit = 0;
 
 void stopTimer0(void)
 {
@@ -717,6 +763,14 @@ ISR(TIMER0_OVF_vect)
 		else
 			milli_snoozer = false;
 	}
+
+	if (millis_standoff>0)
+		millis_standoff--;
+
+	if (millis_im_hit>1)
+		millis_im_hit--;
+	if (millis_other_hit>1)
+		millis_other_hit--;
 }
 
 uint32_t millis(void)
