@@ -269,11 +269,6 @@ const uint8_t x60_table_size = sizeof(x60_table);
 // Tracks the current register address
 volatile uint8_t reg_addr = 0x00;
 
-// Tracks whether to start a conversion cycle
-volatile bool start_conversion = false;
-
-
-
 void setup();
 void loop();
 
@@ -716,24 +711,23 @@ ISR(TIMER0_OVF_vect)
 		millis_standoff--;
 	}
 
-	if (millis_im_hit>1)
+	if (millis_im_hit>0)
 	{
+		if (millis_im_hit==1)
+		{
+			update_leds();
+		}
 		millis_im_hit--;
 	}
-	else if (millis_im_hit==1)
+	if (millis_other_hit>0)
 	{
-		millis_im_hit--;
-		update_leds();
-	}
-	if (millis_other_hit>1)
-	{
+		if (millis_other_hit==1)
+		{
+			update_leds();
+		}
 		millis_other_hit--;
 	}
-	else if (millis_other_hit==1)
-	{
-		millis_other_hit--;
-		update_leds();
-	}
+	
 }
 
 uint32_t millis(void)
