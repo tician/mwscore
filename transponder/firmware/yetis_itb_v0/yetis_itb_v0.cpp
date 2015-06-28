@@ -353,6 +353,8 @@ void setup()
 
 	// Set device address (use some default in setup() config?)
 	usiTwiSlaveInit(x00_table[3]);
+	
+	
 }
 
 
@@ -1100,6 +1102,7 @@ int main(void)
 {
 	configTimer0_millis();
 	setup();
+	configTimer1();
 	
 	while(1)
 	{

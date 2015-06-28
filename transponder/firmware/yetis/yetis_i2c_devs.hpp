@@ -95,7 +95,7 @@ Default values grabbed from EEPROM at boot
 					101	CH2_ONLY
 					110	CH1_SOLID + CH2_FLASHING
 					111	CH1_FLASHING + CH2_SOLID
-	0x40: LED State										(RW) (0x00~0xFF)
+	0x40: LED OVERRIDE Value							(RW) (0x00~0xFF)
 	0x41: LED IM_HIT Value								(RW) (0x00~0xFF)
 	0x42: LED OTHER_HIT Value							(RW) (0x00~0xFF)
 	0x43: LED HAVE_FLAG Value							(RW) (0x00~0xFF)
@@ -143,7 +143,7 @@ Default values grabbed from EEPROM at boot
 					101	CH2_ONLY
 					110	CH1_SOLID + CH2_FLASHING
 					111	CH1_FLASHING + CH2_SOLID
-	0x40: LED State										(RW) (0x00~0xFF)
+	0x40: LED OVERRIDE Value							(RW) (0x00~0xFF)
 	0x41: LED IM_HIT Value								(RW) (0x00~0xFF)
 	0x42: LED OTHER_HIT Value							(RW) (0x00~0xFF)
 	0x43: LED HAVE_FLAG Value							(RW) (0x00~0xFF)
@@ -170,7 +170,7 @@ Default values grabbed from EEPROM at boot
 					101	WAHWAHWAH
 					110	RISING
 					111	FALLING
-	0x50: Buzzer State									(RW) (0x00~0xFF)
+	0x50: Buzzer OVERRIDE Value							(RW) (0x00~0xFF)
 	0x51: Buzzer IM_HIT Value							(RW) (0x00~0xFF)
 	0x52: Buzzer OTHER_HIT Value						(RW) (0x00~0xFF)
 	0x53: Buzzer HAVE_FLAG Value						(RW) (0x00~0xFF)
