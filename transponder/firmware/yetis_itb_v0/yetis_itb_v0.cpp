@@ -26,9 +26,9 @@
 #include <avr/io.h>
 #include <avr/eeprom.h>
 #include <avr/interrupt.h>
+#include <avr/wdt.h>
 
-#if defined(__AVR_ATtiny25__) | defined(__AVR_ATtiny45__) | defined(__AVR_ATtiny85__)
-#define I2C_ENABLED		1
+#if defined(__AVR_ATtiny45__) | defined(__AVR_ATtiny85__)
 #include "usiTwiSlave.h"
 #include "yetis_i2c_devs.hpp"
 using namespace mechwarfare;
@@ -294,6 +294,7 @@ void update_leds(void);
 void fsr_calibration(void);
 void grabFromEEPROM(void);
 void saveToEEPROM(void);
+void wdtReboot(void);
 
 
 
@@ -345,11 +346,11 @@ void setup()
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// Set I2C event functions
-	usi_onReceiverPtr = I2C_Rx_Event;
-	usi_onRequestPtr = I2C_Rq_Event;
+//	usi_onReceiverPtr = I2C_Rx_Event;
+//	usi_onRequestPtr = I2C_Rq_Event;
 
 	// Set device address (use some default in setup() config?)
-	usiTwiSlaveInit(x00_table[3]);
+//	usiTwiSlaveInit(x00_table[3]);
 	
 	
 }
@@ -358,6 +359,30 @@ void setup()
 
 void loop()
 {
+//	millis_im_hit = 5001;
+//	x40_table[0] = (yetisI2Cdevs::FORCE_ACTIVE) | (yetisI2Cdevs::FREQ_0_500Hz) | (yetisI2Cdevs::LEDS_FLOWING);
+//	update_leds();
+//	while(1) { safe_sleep(10); }
+
+
+	while(1)
+	{
+		LED1_ON(); LED2_OFF();
+		safe_sleep(250);
+//		_delay_ms(250);
+		LED1_ON(); LED2_ON();
+		safe_sleep(250);
+//		_delay_ms(250);
+		LED1_OFF(); LED2_ON();
+		safe_sleep(250);
+//		_delay_ms(250);
+		LED1_OFF(); LED2_OFF();
+		safe_sleep(250);
+//		_delay_ms(250);
+	}
+
+
+
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// I2C Slave Mode
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -488,8 +513,7 @@ void I2C_Rx_Event(uint8_t nBytes)
 			}
 			if ( more_garbage & (yetisI2Cdevs::REBOOT) )
 			{
-				//cli();
-				//reboot using wdt;
+				//wdtReboot();
 			}
 			more_garbage &= ( (yetisI2Cdevs::OTHER_HIT) | (yetisI2Cdevs::HAVE_FLAG) | (yetisI2Cdevs::AM_CAPTURING) );
 
@@ -671,7 +695,9 @@ volatile bool milli_snoozer = false;
 
 void stopTimer0(void)
 {
+	GTCCR |= (1<<TSM);
 	// Disable counter while configuring
+	TCCR0A = 0;
 	TCCR0B = 0;
 	// Reset count
 	TCNT0 = 0;
@@ -688,19 +714,25 @@ void configTimer0_millis(void)
 	// Enable OCR0A interrupt
 //	TIMSK0 = (1<<OCIE0B) | (0<<OCIE0A) | (0<<TOIE0);
 	// Enable OVF interrupt
-	TIMSK = (0<<OCIE0B) | (0<<OCIE0A) | (1<<TOIE0);
+	TIMSK &= ~( (1<<OCIE0B) | (1<<OCIE0A) );
+	TIMSK |= (1<<TOIE0);
 
 	// PWM, Fast mode (TOP=OCRA)
 	// Compare Output Mode (OC0A disconnected, OC0B disconnected)
 	TCCR0A = (0<<COM0A1) | (0<<COM0A0) | (0<<COM0B1) | (0<<COM0B0) | (1<<WGM01) | (1<<WGM00);
 	// Enable counter clock (1/64 prescaler)
 	TCCR0B = (0<<FOC0A) | (0<<FOC0B) | (1<<WGM02) | (0<<CS02) | (1<<CS01) | (1<<CS00);
+
+	GTCCR &= ~(1<<TSM);
 }
 
 ISR(TIMER0_OVF_vect)
 {
+//	uint8_t sreg = SREG;
+//	cli();
+
 	millis_counter++;
-	I2C_Stop_Check();
+//	I2C_Stop_Check();
 
 	if (milli_snoozer)
 	{
@@ -709,7 +741,7 @@ ISR(TIMER0_OVF_vect)
 		else
 			milli_snoozer = false;
 	}
-
+/*
 	if (millis_standoff>0)
 	{
 		millis_standoff--;
@@ -731,7 +763,8 @@ ISR(TIMER0_OVF_vect)
 		}
 		millis_other_hit--;
 	}
-	
+*/
+//	SREG = sreg;
 }
 
 uint32_t millis(void)
@@ -784,7 +817,8 @@ void configTimer1(void)
 	OCR1C = 121;
 
 	// Enable OVF interrupt
-	TIMSK = (0<<OCIE1B) | (0<<OCIE1A) | (1<<TOIE1);
+	TIMSK &= ~( (1<<OCIE1B) | (1<<OCIE1A) );
+	TIMSK |= (1<<TOIE1);
 
 	// Clear Timer/Counter on Compare Match: TOP=OCR1C
 	// Compare Output Mode (OC1A disconnected, OC1B disconnected)
@@ -799,6 +833,9 @@ ISR(TIMER1_OVF_vect)
 	{
 		return;
 	}
+
+//	uint8_t sreg = SREG;
+//	cli();
 
 	if (leds_top == 0xFF)
 	{
@@ -831,6 +868,8 @@ ISR(TIMER1_OVF_vect)
 	{
 		leds_count = 0;
 	}
+
+//	SREG = sreg;
 }
 
 void update_leds(void)
@@ -1096,12 +1135,38 @@ void saveToEEPROM(void)
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void wdtReboot(void)
+{
+	cli();
+	wdt_enable(WDTO_250MS);
+	while(1);
+}
+uint8_t mcusr_mirror __attribute__((section (".noinit")));
+void get_mcusr(void) \
+	__attribute__((naked)) \
+	__attribute__((section(".init3")));
+void get_mcusr(void)
+{
+	mcusr_mirror = MCUSR;
+	MCUSR = 0;
+	wdt_disable();
+}
 int main(void)
 {
-	setup();
+	get_mcusr();
+
+//	wdt_enable(WDTO_250MS);
+//	wdt_reset();
+
+// Change Main Clock Divisor to 1 (8MHz)
+	CLKPR = (1<<CLKPCE);
+	CLKPR = 0;
+
 	configTimer0_millis();
-	configTimer1();
-	
+//	configTimer1();
+	setup();
+	sei();
+
 	while(1)
 	{
 		loop();
