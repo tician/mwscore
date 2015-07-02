@@ -313,7 +313,6 @@ void setup()
 	PORTB &= ~((1<<PIN1) | (1<<PIN4));
 	// Disable PB3/ADC3 pull-up (use 10k external pull-up)
 	PORTB &= ~(1<<PIN3);
-//	PORTB |= (1<<PIN3);
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ADC Setup for normal usage
@@ -326,17 +325,6 @@ void setup()
 	// Unipolar mode, no input polarity reversal, Free Running mode
 	ADCSRB = (0<<BIN) | (0<<IPR) | (0<<ADTS2) | (0<<ADTS1) | (0<<ADTS0);	
 
-/*
-	// Clear ADC Interrupt Flag
-	ADCSRA |= (uint8_t) (1 << ADIF);
-	// Begin ADC Conversion
-	ADCSRA |= (uint8_t) (1 << ADSC);
-
-	// Wait while ADC Interrupt Flag not set
-	while(!(ADCSRA & (1 << ADIF)));
-
-	uint8_t garbage = ADCH;
-*/
 	ADC_poll();
 /*
 	// Set PB3 output (BUZZER output enabled)
@@ -352,39 +340,12 @@ void setup()
 
 	// Set device address (use some default in setup() config?)
 	usiTwiSlaveInit(x00_table[3]);
-	
-	
 }
 
 
 
 void loop()
 {
-
-//	millis_im_hit = 5001;
-//	x40_table[0] = (yetisI2Cdevs::FORCE_ACTIVE) | (yetisI2Cdevs::FREQ_0_500Hz) | (yetisI2Cdevs::LEDS_FLOWING);
-//	update_leds();
-//	while(1) { safe_sleep(10); }
-
-/*
-	while(1)
-	{
-		LED1_ON(); LED2_OFF();
-		safe_sleep(250);
-//		_delay_ms(250);
-		LED1_ON(); LED2_ON();
-		safe_sleep(250);
-//		_delay_ms(250);
-		LED1_OFF(); LED2_ON();
-		safe_sleep(250);
-//		_delay_ms(250);
-		LED1_OFF(); LED2_OFF();
-		safe_sleep(250);
-//		_delay_ms(250);
-	}
-*/
-
-
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// I2C Slave Mode
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -413,7 +374,7 @@ void loop()
 				hit_detect = 0;
 			}
 
-			// If possible 'hits' > threshold, probably did get hit
+			// If possible 'hits' > sdph, probably did get hit
 			if (hit_detect > x30_table[0])
 			{
 				// Let transponder know we got hit and compute new damage count
@@ -429,7 +390,6 @@ void loop()
 			}
 		}
 		I2C_Stop_Check();
-//		safe_sleep(1);
 	}	// while(1)
 
 }	// loop()
@@ -713,8 +673,6 @@ void configTimer0_millis(void)
 	// 8.0e6/(64*125) = 1ms
 	OCR0A = 124;
 
-	// Enable OCR0A interrupt
-//	TIMSK0 = (1<<OCIE0B) | (0<<OCIE0A) | (0<<TOIE0);
 	// Enable OVF interrupt
 	TIMSK &= ~( (1<<OCIE0B) | (1<<OCIE0A) );
 	TIMSK |= (1<<TOIE0);
@@ -823,7 +781,7 @@ void configTimer1(void)
 	TIMSK |= (1<<TOIE1);
 
 	PLLCSR = 0;
-	// Clear Timer/Counter on Compare Match: TOP=OCR1C
+	// Clear Timer/Counter on Compare Match and PWM1A for overflow at TOP: TOP=OCR1C
 	// Compare Output Mode (OC1A disconnected, OC1B disconnected)
 	// Enable counter clock (1/4096 prescaler)
 	TCCR1 = (1<<CTC1) | (1<<PWM1A) |(0<<COM1A1) | (0<<COM1A0) | (1<<CS13) | (1<<CS12) | (0<<CS11) | (1<<CS10);
@@ -832,18 +790,10 @@ void configTimer1(void)
 
 ISR(TIMER1_OVF_vect)
 {
-//	LED1_ON();
-//	safe_sleep(50);
-
 	if (!leds_active)
 	{
-//		LED1_OFF();
 		return;
 	}
-//	LED2_ON();
-
-//	uint8_t sreg = SREG;
-//	cli();
 
 	if (leds_top == 0xFF)
 	{
@@ -876,8 +826,6 @@ ISR(TIMER1_OVF_vect)
 	{
 		leds_count = 0;
 	}
-
-//	SREG = sreg;
 }
 
 void update_leds(void)
@@ -1017,7 +965,6 @@ void fsr_calibration(void)
 	uint8_t hit_now = 0;
 	uint8_t hit_last = 0;
 
-//	control_leds( (yetisI2Cdevs::LEDS_CH1S_CH2F | yetisI2Cdevs::FREQ_4_000Hz) );
 	x40_table[0] = (yetisI2Cdevs::LEDS_CH1S_CH2F | yetisI2Cdevs::FREQ_4_000Hz | yetisI2Cdevs::FORCE_ACTIVE);
 	update_leds();
 
