@@ -313,6 +313,7 @@ void setup()
 	PORTB &= ~((1<<PIN1) | (1<<PIN4));
 	// Disable PB3/ADC3 pull-up (use 10k external pull-up)
 	PORTB &= ~(1<<PIN3);
+//	PORTB |= (1<<PIN3);
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ADC Setup for normal usage
@@ -321,7 +322,7 @@ void setup()
 	// Power saving by disable digital input buffer for dedicated ADC pin
 	DIDR0 = (1 << ADC3D);
 	// ADC Enable, Clock 1/2 div. (8MHz/2 => 4MHz)
-	ADCSRA = (1 << ADEN) | (0<<ADSC) | (0<<ADATE) | (0<<ADIF) | (0<<ADIE) | (0 << ADPS2) | (0 << ADPS1) | (0 << ADPS0);
+	ADCSRA = (1 << ADEN) | (0<<ADSC) | (0<<ADATE) | (0<<ADIF) | (0<<ADIE) | (0 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
 	// Unipolar mode, no input polarity reversal, Free Running mode
 	ADCSRB = (0<<BIN) | (0<<IPR) | (0<<ADTS2) | (0<<ADTS1) | (0<<ADTS0);	
 
@@ -403,7 +404,7 @@ void loop()
 			fsr = ((fsr + ADC_poll())>>1);
 
 			// Increment a consecutive 'hit' counter to cut down on noise
-			if (fsr < x30_table[0])
+			if (fsr < x30_table[1])
 			{
 				hit_detect++;
 			}
@@ -413,7 +414,7 @@ void loop()
 			}
 
 			// If possible 'hits' > threshold, probably did get hit
-			if (hit_detect > x30_table[1])
+			if (hit_detect > x30_table[0])
 			{
 				// Let transponder know we got hit and compute new damage count
 				x10_table[0] |= yetisI2Cdevs::IM_HIT;
