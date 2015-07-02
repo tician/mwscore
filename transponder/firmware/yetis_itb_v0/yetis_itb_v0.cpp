@@ -346,11 +346,11 @@ void setup()
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// Set I2C event functions
-//	usi_onReceiverPtr = I2C_Rx_Event;
-//	usi_onRequestPtr = I2C_Rq_Event;
+	usi_onReceiverPtr = I2C_Rx_Event;
+	usi_onRequestPtr = I2C_Rq_Event;
 
 	// Set device address (use some default in setup() config?)
-//	usiTwiSlaveInit(x00_table[3]);
+	usiTwiSlaveInit(x00_table[3]);
 	
 	
 }
@@ -359,12 +359,13 @@ void setup()
 
 void loop()
 {
+
 //	millis_im_hit = 5001;
 //	x40_table[0] = (yetisI2Cdevs::FORCE_ACTIVE) | (yetisI2Cdevs::FREQ_0_500Hz) | (yetisI2Cdevs::LEDS_FLOWING);
 //	update_leds();
 //	while(1) { safe_sleep(10); }
 
-
+/*
 	while(1)
 	{
 		LED1_ON(); LED2_OFF();
@@ -380,7 +381,7 @@ void loop()
 		safe_sleep(250);
 //		_delay_ms(250);
 	}
-
+*/
 
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -728,11 +729,11 @@ void configTimer0_millis(void)
 
 ISR(TIMER0_OVF_vect)
 {
-//	uint8_t sreg = SREG;
-//	cli();
+	uint8_t sreg = SREG;
+	cli();
 
 	millis_counter++;
-//	I2C_Stop_Check();
+	I2C_Stop_Check();
 
 	if (milli_snoozer)
 	{
@@ -741,7 +742,7 @@ ISR(TIMER0_OVF_vect)
 		else
 			milli_snoozer = false;
 	}
-/*
+
 	if (millis_standoff>0)
 	{
 		millis_standoff--;
@@ -763,8 +764,8 @@ ISR(TIMER0_OVF_vect)
 		}
 		millis_other_hit--;
 	}
-*/
-//	SREG = sreg;
+
+	SREG = sreg;
 }
 
 uint32_t millis(void)
@@ -820,19 +821,25 @@ void configTimer1(void)
 	TIMSK &= ~( (1<<OCIE1B) | (1<<OCIE1A) );
 	TIMSK |= (1<<TOIE1);
 
+	PLLCSR = 0;
 	// Clear Timer/Counter on Compare Match: TOP=OCR1C
 	// Compare Output Mode (OC1A disconnected, OC1B disconnected)
 	// Enable counter clock (1/4096 prescaler)
-	TCCR1 = (1<<CTC1) | (0<<PWM1A) |(0<<COM1A1) | (0<<COM1A0) | (1<<CS13) | (1<<CS12) | (0<<CS11) | (1<<CS10);
+	TCCR1 = (1<<CTC1) | (1<<PWM1A) |(0<<COM1A1) | (0<<COM1A0) | (1<<CS13) | (1<<CS12) | (0<<CS11) | (1<<CS10);
 	GTCCR = (0<<PWM1B) | (0<<COM1B1) | (0<<COM1B0) | (0<<FOC1B) | (0<<FOC1A) | (0<<PSR1);
 }
 
 ISR(TIMER1_OVF_vect)
 {
+//	LED1_ON();
+//	safe_sleep(50);
+
 	if (!leds_active)
 	{
+//		LED1_OFF();
 		return;
 	}
+//	LED2_ON();
 
 //	uint8_t sreg = SREG;
 //	cli();
@@ -1163,9 +1170,9 @@ int main(void)
 	CLKPR = 0;
 
 	configTimer0_millis();
-//	configTimer1();
-	setup();
+	configTimer1();
 	sei();
+	setup();
 
 	while(1)
 	{
