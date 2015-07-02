@@ -95,7 +95,7 @@ CFLAGS += -Wstrict-prototypes
 #CFLAGS += -Wundef
 #CFLAGS += -Wunreachable-code
 #CFLAGS += -Wsign-compare
-CFLAGS += -Wa,-adhlns=$(<:%.c=%.lst)
+#CFLAGS += -Wa,-adhlns=$(<:%.c=%.lst)
 #CFLAGS += $(patsubst %,-I%,$(INCLUDE_DIRS))
 CFLAGS += $(CSTANDARD)
 
@@ -116,13 +116,13 @@ CXXFLAGS += -Wundef
 #CXXFLAGS += -Wstrict-prototypes
 #CXXFLAGS += -Wunreachable-code
 #CXXFLAGS += -Wsign-compare
-CXXFLAGS += -Wa,-adhlns=$(<:%.cpp=%.lst)
+#CXXFLAGS += -Wa,-adhlns=$(<:%.cpp=%.lst)
 #CXXFLAGS += $(patsubst %,-I%,$(INCLUDE_DIRS))
 #CXXFLAGS += $(CSTANDARD)
 
 #~~~~~~~~~~~~~~~~~~~~ Compiler Options Assembly ~~~~~~~~~~~~~~~~~~~~
 ASFLAGS = -mmcu=$(MCU) -I. -x assembler-with-cpp
-ASFLAGS += $(ADEFS) -Wa,-adhlns=$(<:%.S=%.lst),-gstabs,--listing-cont-lines=100
+#ASFLAGS += $(ADEFS) -Wa,-adhlns=$(<:%.S=%.lst),-gstabs,--listing-cont-lines=100
 
 #---------------- Library Options ----------------
 # Minimalistic printf version
@@ -370,8 +370,8 @@ clean_list :
 #	$(REMOVEDIR) .dep
 #	$(REMOVE) $(TARGET_OBJS)
 #	$(REMOVE) $(TARGET_OBJS:%.o=%.lst)
-	rm -f $(OBJS)
-	rm -f $(TARGET)
+#	rm -f $(OBJS)
+#	rm -f $(TARGET)
 	rm -rf $(OBJDIR)
 	rm -rf $(BINDIR)
 

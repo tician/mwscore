@@ -316,11 +316,13 @@ void setup()
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ADC Setup for normal usage
 	// Use Vcc as reference, Left Adjust Result, Select ADC3
-	ADMUX = (0 << REFS0) | (1 << ADLAR) | (1 << MUX1) | (1 << MUX0);
+	ADMUX = (0 << REFS1) | (0 << REFS0) | (1 << ADLAR) | (0 << REFS2) | (0 << MUX3) | (0 << MUX2) | (1 << MUX1) | (1 << MUX0);
 	// Power saving by disable digital input buffer for dedicated ADC pin
 	DIDR0 = (1 << ADC3D);
-	// ADC Enable, Clock 1/2 div. (1.2MHz/2 => 600kHz) (9.6MHz/2 => 4.8MHz)
-	ADCSRA = (1 << ADEN) | (0 << ADPS2) | (0 << ADPS1) | (0 << ADPS0);
+	// ADC Enable, Clock 1/2 div. (8MHz/2 => 4MHz)
+	ADCSRA = (1 << ADEN) | (0<<ADSC) | (0<<ADATE) | (0<<ADIF) | (0<<ADIE) | (0 << ADPS2) | (0 << ADPS1) | (0 << ADPS0);
+	// Unipolar mode, no input polarity reversal, Free Running mode
+	ADCSRB = (0<<BIN) | (0<<IPR) | (0<<ADTS2) | (0<<ADTS1) | (0<<ADTS0);	
 
 /*
 	// Clear ADC Interrupt Flag
@@ -365,7 +367,7 @@ void loop()
 	uint16_t damage = 0;
 
 // Set device address
-	usiTwiSlaveInit(x00_table[3]);
+//	usiTwiSlaveInit(x00_table[3]);
 
 	while(1)
 	{
@@ -399,6 +401,8 @@ void loop()
 				millis_standoff = (x20_table[2]<<0) + (x20_table[3]<<8);
 			}
 		}
+		I2C_Stop_Check();
+//		safe_sleep(1);
 	}	// while(1)
 
 }	// loop()
@@ -1094,8 +1098,8 @@ void saveToEEPROM(void)
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 int main(void)
 {
-	configTimer0_millis();
 	setup();
+	configTimer0_millis();
 	configTimer1();
 	
 	while(1)
