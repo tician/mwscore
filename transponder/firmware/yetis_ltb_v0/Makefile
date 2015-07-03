@@ -1,9 +1,9 @@
 #~~~~~~~~~~~~~~~~~~~~ Output File Name ~~~~~~~~~~~~~~~~~~~~
-PROJECT_NAME = yetis_itb_v0
+PROJECT_NAME = yetis_ltb_v0
 
 #~~~~~~~~~~~~~~~~~~~~ Source Files ~~~~~~~~~~~~~~~~~~~~
 SRCS = \
-	yetis_itb_v0.cpp \
+	yetis_ltb_v0.cpp \
 	usiTwiSlave.c
 
 #~~~~~~~~~~~~~~~~~~~~ Object Files ~~~~~~~~~~~~~~~~~~~~
