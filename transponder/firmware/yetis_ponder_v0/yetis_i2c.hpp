@@ -51,6 +51,7 @@ namespace mechwarfare
 	protected:
 		
 	public:
+		yetisI2C() {yetisI2C(0,2);}
 		yetisI2C(int sda, int scl);
 		void search(void);
 		void configure(uint8_t model, uint8_t **configs, uint8_t nConfigs);

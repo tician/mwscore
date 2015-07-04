@@ -53,7 +53,7 @@ char ServerPSWD[] = "robotwars";
 dynamixel::dxl10 		dxlAX(&Serial, PIN_DXL_TXEN);
 dynamixel::dxl20 		dxlXL(&Serial, PIN_DXL_TXEN);
 mechwarfare::yetisUDP	MWclient;
-mechwarfare::yetisI2C	MWdevices;
+mechwarfare::yetisI2C	MWdevices(PIN_I2C_SDA,PIN_I2C_SCL);
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -129,7 +129,7 @@ I2C Slave
 uint8_t EEMEM eep_model = YETIS_MODEL;
 uint8_t EEMEM eep_vhard = YETIS_HARDWARE_REVISION;
 uint8_t EEMEM eep_vfirm = YETIS_FIRMWARE_REVISION;
-uint8_t EEMEM eep_idOffset = 0;	// Offset from model's minimum ID
+uint8_t EEMEM eep_idOffset = 2;	// Offset from model's minimum ID
 
 uint8_t EEMEM eep_hit_durationL = (1000>>0)&0xFF;	// [ms]
 uint8_t EEMEM eep_hit_durationH = (1000>>8)&0xFF;	// [ms]
@@ -352,7 +352,8 @@ void setup()
 	usi_onRequestPtr = I2C_Rq_Event;
 
 	// Set device address (use some default in setup() config?)
-	usiTwiSlaveInit(x00_table[3]);
+	usiTwiSlaveInit(0x7F);
+	safe_sleep(2000);
 }
 
 
@@ -362,6 +363,8 @@ void loop()
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// I2C Slave Mode
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Set device address (use some default in setup() config?)
+	usiTwiSlaveInit(x00_table[3]);
 // Create some variables
 	uint16_t fsr = 255;
 	uint8_t hit_detect = 0;
@@ -387,16 +390,21 @@ void loop()
 			// If possible 'hits' > sdph, probably did get hit
 			if (hit_detect > x30_table[0])
 			{
+				uint8_t sreg = SREG;
+				cli();
 				// Let transponder know we got hit and compute new damage count
 				x10_table[0] |= yetisI2Cdevs::IM_HIT;
 				damage += x20_table[4];
+
 				x10_table[1] = (damage>>0)&0xFF;
 				x10_table[2] = (damage>>8)&0xFF;
 
-				hit_detect = 0;
 				millis_im_hit = (x20_table[0]<<0) + (x20_table[1]<<8) + 1;
-				update_leds();
 				millis_standoff = (x20_table[2]<<0) + (x20_table[3]<<8);
+				SREG = sreg;
+
+				hit_detect = 0;
+				update_leds();
 			}
 		}
 		I2C_Stop_Check();
@@ -454,6 +462,8 @@ void I2C_Rx_Event(uint8_t nBytes)
 	if (nBytes > TWI_RX_BUFFER_SIZE)
 		return;
 
+	uint8_t sreg = SREG;
+	cli();
 	// Get write address
 	reg_addr = usiTwiReceiveByte();
 	uint8_t more_garbage = 0;
@@ -463,9 +473,10 @@ void I2C_Rx_Event(uint8_t nBytes)
 		// No roll-over
 		if ( reg_addr < (0x00+x00_table_size) )
 		{
+			more_garbage = usiTwiReceiveByte();
 			// Save new ID to table
 			if (reg_addr == 0x03)
-				x00_table[3] = usiTwiReceiveByte();
+				x00_table[3] = more_garbage;
 			reg_addr++;
 		}
 		else if ( reg_addr < 0x10 )
@@ -493,10 +504,10 @@ void I2C_Rx_Event(uint8_t nBytes)
 			{
 				millis_other_hit = (x20_table[0]<<0) + (x20_table[1]<<8) + 1;
 				// actual change in LED sequence may be occurring
-				if ( !( x10_table[0] & (yetisI2Cdevs::OTHER_HIT) ) )
-				{
+//				if ( !( x10_table[0] & (yetisI2Cdevs::OTHER_HIT) ) )
+//				{
 					update_leds();
-				}
+//				}
 			}
 			// actual change in LED sequence may be occurring
 			if ( (more_garbage & (yetisI2Cdevs::HAVE_FLAG) ) != (x10_table[0] & (yetisI2Cdevs::HAVE_FLAG) ) )
@@ -578,6 +589,7 @@ void I2C_Rx_Event(uint8_t nBytes)
 			more_garbage = usiTwiReceiveByte();
 		}
 	}
+	SREG = sreg;
 }
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void I2C_Rq_Event(void)
@@ -681,7 +693,8 @@ void configTimer0_millis(void)
 	stopTimer0();
 
 	// 8.0e6/(64*125) = 1ms
-	OCR0A = 124;
+//	OCR0A = 124;
+	OCR0A = 125;
 
 	// Enable OVF interrupt
 	TIMSK &= ~( (1<<OCIE0B) | (1<<OCIE0A) );
