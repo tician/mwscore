@@ -62,6 +62,7 @@ MCU = attiny85
 #    (Note: 3 is not always the best optimization level. See avr-libc FAQ.)
 #OPT = s
 OPT = 2
+#OPT = 0
 
 #~~~~~~~~~~~~~~~~~~~~ C Standard level ~~~~~~~~~~~~~~~~~~~~
 #     c89   = "ANSI" C

@@ -129,7 +129,7 @@ I2C Slave
 uint8_t EEMEM eep_model = YETIS_MODEL;
 uint8_t EEMEM eep_vhard = YETIS_HARDWARE_REVISION;
 uint8_t EEMEM eep_vfirm = YETIS_FIRMWARE_REVISION;
-uint8_t EEMEM eep_idOffset = 2;	// Offset from model's minimum ID
+uint8_t EEMEM eep_idOffset = 3;	// Offset from model's minimum ID
 
 uint8_t EEMEM eep_hit_durationL = (1000>>0)&0xFF;	// [ms]
 uint8_t EEMEM eep_hit_durationH = (1000>>8)&0xFF;	// [ms]
@@ -314,7 +314,9 @@ void wdtReboot(void);
 
 
 
-void setup()
+void
+//__attribute__((optimize("O0"))) 
+setup()
 {
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	grabFromEEPROM();
@@ -358,7 +360,9 @@ void setup()
 
 
 
-void loop()
+void
+__attribute__((optimize("O0"))) 
+loop()
 {
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// I2C Slave Mode
@@ -462,8 +466,8 @@ void I2C_Rx_Event(uint8_t nBytes)
 	if (nBytes > TWI_RX_BUFFER_SIZE)
 		return;
 
-	uint8_t sreg = SREG;
-	cli();
+//	uint8_t sreg = SREG;
+//	cli();
 	// Get write address
 	reg_addr = usiTwiReceiveByte();
 	uint8_t more_garbage = 0;
@@ -476,7 +480,12 @@ void I2C_Rx_Event(uint8_t nBytes)
 			more_garbage = usiTwiReceiveByte();
 			// Save new ID to table
 			if (reg_addr == 0x03)
-				x00_table[3] = more_garbage;
+			{
+				if ( (more_garbage >= yetisI2Cdevs::YETIS_MIN_ID_LTB) && (more_garbage <= yetisI2Cdevs::YETIS_MAX_ID_LTB) )
+				{
+					x00_table[3] = more_garbage;
+				}
+			}
 			reg_addr++;
 		}
 		else if ( reg_addr < 0x10 )
@@ -488,6 +497,7 @@ void I2C_Rx_Event(uint8_t nBytes)
 		else if ( reg_addr < (0x10+1) )//x10_table_size) )
 		{
 			more_garbage = usiTwiReceiveByte();
+			uint8_t tempStatus = x10_table[0];
 			reg_addr++;
 
 			if ( more_garbage & (yetisI2Cdevs::SAVE_TO_EEPROM) )
@@ -499,29 +509,29 @@ void I2C_Rx_Event(uint8_t nBytes)
 				//wdtReboot();
 			}
 			more_garbage &= ( (yetisI2Cdevs::OTHER_HIT) | (yetisI2Cdevs::HAVE_FLAG) | (yetisI2Cdevs::AM_CAPTURING) );
+			
+			x10_table[0] &= yetisI2Cdevs::IM_HIT;
+			x10_table[0] |= more_garbage;
 
 			if ( more_garbage & (yetisI2Cdevs::OTHER_HIT) )
 			{
 				millis_other_hit = (x20_table[0]<<0) + (x20_table[1]<<8) + 1;
 				// actual change in LED sequence may be occurring
-//				if ( !( x10_table[0] & (yetisI2Cdevs::OTHER_HIT) ) )
-//				{
+				if ( !( tempStatus & (yetisI2Cdevs::OTHER_HIT) ) )
+				{
 					update_leds();
-//				}
+				}
 			}
 			// actual change in LED sequence may be occurring
-			if ( (more_garbage & (yetisI2Cdevs::HAVE_FLAG) ) != (x10_table[0] & (yetisI2Cdevs::HAVE_FLAG) ) )
+			if ( (more_garbage & (yetisI2Cdevs::HAVE_FLAG) ) != (tempStatus & (yetisI2Cdevs::HAVE_FLAG) ) )
 			{
 				update_leds();
 			}
 			// actual change in LED sequence may be occurring
-			if ( (more_garbage & (yetisI2Cdevs::AM_CAPTURING) ) != (x10_table[0] & (yetisI2Cdevs::AM_CAPTURING) ) )
+			if ( (more_garbage & (yetisI2Cdevs::AM_CAPTURING) ) != (tempStatus & (yetisI2Cdevs::AM_CAPTURING) ) )
 			{
 				update_leds();
 			}
-
-			x10_table[0] &= yetisI2Cdevs::IM_HIT;
-			x10_table[0] |= more_garbage;
 		}
 		else if ( reg_addr < 0x20 )
 		{
@@ -589,7 +599,7 @@ void I2C_Rx_Event(uint8_t nBytes)
 			more_garbage = usiTwiReceiveByte();
 		}
 	}
-	SREG = sreg;
+//	SREG = sreg;
 }
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void I2C_Rq_Event(void)
