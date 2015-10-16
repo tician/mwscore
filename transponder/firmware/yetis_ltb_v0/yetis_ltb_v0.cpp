@@ -532,7 +532,7 @@ void I2C_Rx_Event(uint8_t nBytes)
 			{
 				update_leds();
 			}
-		}
+		},
 		else if ( reg_addr < 0x20 )
 		{
 			// Discard excess data

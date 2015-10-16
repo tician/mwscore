@@ -382,6 +382,229 @@ uint8_t dxl20::txrx(uint8_t *params, uint16_t &len, uint8_t id, uint8_t inst, ui
 
 }
 
+
+
+
+uint8_t dxl20::rxtx(uint32_t timeout_to_message)
+{
+// PROCESS MESSAGE FROM CONTROLLER
+	uint32_t timeout_counter = micros() + timeout_to_message;
+	// wait for new data
+	while (!dxl_uart->available())
+	{
+		delayMicroseconds(50);
+		if (micros()>timeout_counter)
+		{
+			return ERROR_RX_TIMEOUT;
+		}
+	}
+
+	// Drop new data until hit header
+	// Grab at least 11 bytes (4 Head + 1 ID + 2 Length + 1 Inst + 1 Err + 2 CRC)
+	// Check buffy[5] & buffy[6] for packet length
+	// Adjust timeout counter for expected length
+	// Check for buffer overrun
+
+	timeout_counter = micros() + 500;
+	uint8_t iter=0;
+	while (micros() < timeout_counter)
+	{
+		if (dxl_uart->available())
+		{
+			buffy[iter] = dxl_uart->read();
+			if (iter>2)
+			{
+				iter++;
+			}
+			else if ( (iter==0) && (buffy[iter]==0xFF) )
+			{
+				iter++;
+			}
+			else if ( (iter==1) && (buffy[iter]==0xFF) )
+			{
+				iter++;
+			}
+			else if ( (iter==2) && (buffy[iter]==0xFD) )
+			{
+				iter++;
+			}
+			
+			if (iter==7)
+			{
+				packLen = (buffy[5] + (buffy[6]<<8));
+				timeout_counter += packLen*10;
+				fullLen = (4+1+2 + packLen);
+			}
+			if (iter==fullLen)
+			{
+				// Received entire packet
+				break;
+			}
+			if (iter==DXL_BUFFER_SIZE)
+			{
+				// Buffer full
+				memset(buffy, 0, DXL_BUFFER_SIZE);
+				return ERROR_INPUT_BUFFER_OVERRUN;
+			}
+		}
+		else
+		{
+			delayMicroseconds(20);
+		}
+	}
+	if (iter!=fullLen)
+	{
+		// Timeout
+		memset(buffy, 0, DXL_BUFFER_SIZE);
+		return ERROR_RX_TIMEOUT;
+	}
+
+	// Process Command Packet
+	tempcrc = buffy[fullLen-2] + (buffy[fullLen-1]<<8);
+	if ( tempcrc != checker.crc(buffy+4, 1+2+ packLen -2, 0x0E28) )
+	{
+		// CRC mismatch
+		memset(buffy, 0, DXL_BUFFER_SIZE);
+		return ERROR_CRC_MISMATCH;
+	}
+
+/*
+	if ( buffy[4] != device_id )
+	{
+		// ID mismatch
+		memset(buffy, 0, DXL_BUFFER_SIZE);
+		return ERROR_ID_MISMATCH;
+	}
+
+	if ( buffy[7] != INST_STATUS_RETURN )
+	{
+		// Received command packet from somewhere...
+		// handleCommandPacket();
+		memset(buffy, 0, DXL_BUFFER_SIZE);
+		return ERROR_RECEIVED_COMMAND_PACKET
+	}
+
+	returnData = buffy[8]; //start at device error byte
+	len = (-1+ packLen -2); // cut instruction and CRC bytes
+	return ERROR_NONE;
+*/
+
+/// HANDLE MESSAGE CONTENT
+	// Message intended for this dxl device
+	if ( buffy[4] == device_id )
+	{
+		
+	}
+	// Message may have component intended for this dxl device
+	else if ( (buffy[4] == BROADCAST_ID) && (!intermediate_controller) )
+	{
+		// Just a dxl device
+		
+	}
+	else if ( (buffy[4] == BROADCAST_ID) && (!intermediate_controller) )
+	{
+		// Process and/or pass-through packet for other dxl interface(s)
+		if ( buffy[7] == INST_AX_SYNC_READ )
+		{
+			// Process AX psuedo SYNC_READ
+			
+		}
+		else if ( buffy[7] == INST_AX_BULK_READ )
+		{
+			// Process AX psuedo BULK_READ
+			
+		}
+		else if ( buffy[7] == INST_AX_BULK_WRITE )
+		{
+			// Process AX psuedo BULK_WRITE
+			
+		}
+		else
+		{
+			// Otherwise simple pass-through while still checking
+			//  for anything intended for this dxl device
+			
+		}
+	}
+	else
+	{
+		memset(buffy, 0, DXL_BUFFER_SIZE);
+		return ERROR_ID_MISMATCH;
+	}
+
+
+
+/// HANDLE RESPONSE TO CONTROLLER
+/*
+	if (params==NULL)
+		return ERROR_INVALID_POINTER;
+	if (returnData!=NULL)
+		return ERROR_INVALID_POINTER;
+
+// Header (4), ID (1), PacketLength (2), Inst(1), Param(len), CRC (2)
+	uint16_t fullLen = 4+1+2+1+len+2;
+	uint16_t packLen = 1 + len + 2;
+
+	if (fullLen>DXL_BUFFER_SIZE)
+	{
+		// Buffer too small
+		return ERROR_OUTPUT_BUFFER_OVERRUN;
+	}
+
+// Check 'inst' valid/supported
+//	if (inst == INST_PING)
+
+
+// Build TX packet
+	buffy[0] = 0xFF;
+	buffy[1] = 0xFF;
+	buffy[2] = 0xFD;
+	buffy[3] = 0x00;
+
+	buffy[4] = id;
+	buffy[5] = (uint8_t) (packLen>>0)&0xFF;
+	buffy[6] = (uint8_t) (packLen>>8)&0xFF;
+	buffy[7] = inst;
+	// copy parameters
+	memcpy(buffy+8, params, len);
+
+	uint16_t tempcrc = checker.crc(buffy+4, len+4, 0x0E28);
+	buffy[fullLen-2] = (uint8_t) (tempcrc>>0)&0xFF;
+	buffy[fullLen-1] = (uint8_t) (tempcrc>>8)&0xFF;
+
+	// flush input buffer
+	while (dxl_uart->available())
+	{
+		dxl_uart->read();
+	}
+
+	digitalWrite(pin_txen, HIGH);	// TX-on, RX-off
+	dxl_uart->write(buffy, fullLen);
+	dxl_uart->flush();	// calls yield(), so might take too long with wifi stuff...
+	//while(dxl_uart->availableForWrite()<0x80) { delayMicroseconds(50);}
+	digitalWrite(pin_txen, LOW);	// TX-off, RX-on
+
+	if ( (inst == INST_SYNC_WRITE) || ((id==BROADCAST_ID)&&(inst!=INST_PING)) )
+		return ERROR_NONE;
+
+	// clear buffer
+	memset(buffy, 0, DXL_BUFFER_SIZE);
+	len = 0;
+	packLen = 0;
+	fullLen = 0;
+
+//	free(params);
+*/
+
+
+
+
+
+
+}
+
+
+
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

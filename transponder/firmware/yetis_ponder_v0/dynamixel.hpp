@@ -75,6 +75,7 @@ namespace dynamixel
 #ifndef INST_STATUS_RETURN
 #define INST_STATUS_RETURN				0x55
 #endif
+
 #ifndef INST_SYNC_READ
 #define INST_SYNC_READ					0x82
 #endif
@@ -90,6 +91,17 @@ namespace dynamixel
 #ifndef INST_BULK_WRITE
 #define INST_BULK_WRITE					0x93
 #endif
+
+#ifndef INST_AX_SYNC_READ
+#define INST_AX_SYNC_READ				0xC2
+#endif
+#ifndef INST_AX_BULK_READ
+#define INST_AX_BULK_READ				0xD2
+#endif
+#ifndef INST_AX_BULK_WRITE
+#define INST_AX_BULK_WRITE				0xD3
+#endif
+
 
 #ifndef ERRBIT_VOLTAGE
 #define ERRBIT_VOLTAGE					(1)
