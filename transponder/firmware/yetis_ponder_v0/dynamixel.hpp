@@ -101,6 +101,15 @@ namespace dynamixel
 #ifndef INST_AX_BULK_WRITE
 #define INST_AX_BULK_WRITE				0xD3
 #endif
+#ifndef INST_MIXED_SYNC_READ
+#define INST_MIXED_SYNC_READ			0xCA
+#endif
+#ifndef INST_MIXED_BULK_READ
+#define INST_MIXED_BULK_READ			0xDA
+#endif
+#ifndef INST_MIXED_BULK_WRITE
+#define INST_MIXED_BULK_WRITE			0xDB
+#endif
 
 
 #ifndef ERRBIT_VOLTAGE
@@ -142,7 +151,7 @@ namespace dynamixel
 	class crc
 	{
 	private:
-		static uint16_t crc_table[256] = {
+		static uint16_t crc_table_[256] = {
 			0x0000, 0x8005, 0x800F, 0x000A, 0x801B, 0x001E, 0x0014, 0x8011,
 			0x8033, 0x0036, 0x003C, 0x8039, 0x0028, 0x802D, 0x8027, 0x0022,
 			0x8063, 0x0066, 0x006C, 0x8069, 0x0078, 0x807D, 0x8077, 0x0072,
@@ -183,14 +192,50 @@ namespace dynamixel
 	};
 
 
+
+	class dxl_def
+	{
+	public:
+		struct interface
+		{
+			HardwareSerial* ser;
+			uint8_t ver;
+		};
+
+		uint8_t num;
+		interface dev[4];
+
+		bool add(HardwareSerial* hardware_serial, uint8_t dynamixel_version)
+		{
+			if (num >= 4)
+				return false;
+			num++;
+			dev[num-1].ser = hardware_serial;
+			dev[num-1].ver = dynamixel_version;
+		}
+		bool purge(void)
+		{
+			uint8_t iter;
+			for (iter=0; iter<4; iter++)
+			{
+				num = 0;
+				dev[iter].ser = NULL;
+				dev[iter].ver = 0;
+			}
+		}
+	};
+
+
 	class dxl20
 	{
 	private:
-		HardwareSerial*	dxl_uart;
-		uint8_t			pin_txen;
-		crc				checker;
+		HardwareSerial*	dxl_uart_;
+		uint8_t			pin_txen_;
+		crc				checker_;
+		uint32_t		us_per_byte_;
 
-		uint8_t			buffy[DXL_BUFFER_SIZE];
+		uint8_t			buffy_[DXL_BUFFER_SIZE];
+
 
 	protected:
 		
@@ -205,26 +250,30 @@ namespace dynamixel
 
 //		uint16_t crc(uint8_t *data, uint16_t len, uint16_t seed) {checker.crc(data,len,seed); }
 
-		uint8_t		getReg1(uint8_t id, uint16_t regstart);
-		uint16_t	getReg2(uint8_t id, uint16_t regstart);
-		uint32_t	getReg4(uint8_t id, uint16_t regstart);
-		bool		putReg1(uint8_t id, uint16_t regstart, uint8_t data);
-		bool		putReg2(uint8_t id, uint16_t regstart, uint16_t data);
+		uint8_t		getReg1(uint8_t id, uint16_t reg_start);
+		uint16_t	getReg2(uint8_t id, uint16_t reg_start);
+		uint32_t	getReg4(uint8_t id, uint16_t reg_start);
+		bool		putReg1(uint8_t id, uint16_t reg_start, uint8_t data);
+		bool		putReg2(uint8_t id, uint16_t reg_start, uint16_t data);
 		bool		syncWrite(uint8_t *params, uint16_t length);
 
 		uint16_t	putReg(uint8_t id, uint8_t *params, uint16_t length, uint8_t *error);
-		uint16_t	getReg(uint8_t id, uint16_t regstart, uint16_t length, uint8_t *data);
-		uint8_t		txrx(uint8_t *params, uint16_t &len, uint8_t id, uint8_t inst, uint8_t *returnData);
+		uint16_t	getReg(uint8_t id, uint16_t reg_start, uint16_t length, uint8_t *data);
+		uint8_t		txrx(uint8_t *params, uint16_t &len, uint8_t id, uint8_t inst, uint8_t *return_data);
+
+		dxl_def		other_dxl_;
+		uint8_t		rxtx(uint32_t timeout_to_message);
 	};
 
 
 	class dxl10
 	{
 	private:
-		HardwareSerial*	dxl_uart;
-		uint8_t			pin_txen;
+		HardwareSerial*	dxl_uart_;
+		uint8_t			pin_txen_;
+		uint32_t		us_per_byte_;
 
-		uint8_t			buffy[DXL_BUFFER_SIZE];
+		uint8_t			buffy_[DXL_BUFFER_SIZE];
 
 	protected:
 		
@@ -239,16 +288,16 @@ namespace dynamixel
 
 		uint8_t checksum(uint8_t *data, uint8_t len);
 
-		uint8_t		getReg1(uint8_t id, uint8_t regstart);
-		uint16_t	getReg2(uint8_t id, uint8_t regstart);
-		uint32_t	getReg4(uint8_t id, uint8_t regstart);
-		bool		putReg1(uint8_t id, uint8_t regstart, uint8_t data);
-		bool		putReg2(uint8_t id, uint8_t regstart, uint16_t data);
+		uint8_t		getReg1(uint8_t id, uint8_t reg_start);
+		uint16_t	getReg2(uint8_t id, uint8_t reg_start);
+		uint32_t	getReg4(uint8_t id, uint8_t reg_start);
+		bool		putReg1(uint8_t id, uint8_t reg_start, uint8_t data);
+		bool		putReg2(uint8_t id, uint8_t reg_start, uint16_t data);
 		bool		syncWrite(uint8_t *params, uint8_t length);
 
 		uint8_t		putReg(uint8_t id, uint8_t *params, uint8_t length, uint8_t *error);
-		uint8_t		getReg(uint8_t id, uint8_t regstart, uint8_t length, uint8_t *data);
-		uint8_t		txrx(uint8_t *params, uint8_t &len, uint8_t id, uint8_t inst, uint8_t *returnData);
+		uint8_t		getReg(uint8_t id, uint8_t reg_start, uint8_t length, uint8_t *data);
+		uint8_t		txrx(uint8_t *params, uint8_t &len, uint8_t id, uint8_t inst, uint8_t *return_data);
 	};
 }
 
