@@ -8,20 +8,20 @@
 </settings>
 <grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="yes" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
-<layer number="1" name="Top" color="4" fill="1" visible="yes" active="no"/>
-<layer number="16" name="Bottom" color="1" fill="1" visible="yes" active="no"/>
-<layer number="17" name="Pads" color="2" fill="1" visible="yes" active="no"/>
-<layer number="18" name="Vias" color="2" fill="1" visible="yes" active="no"/>
-<layer number="19" name="Unrouted" color="6" fill="1" visible="yes" active="no"/>
-<layer number="20" name="Dimension" color="15" fill="1" visible="yes" active="no"/>
-<layer number="21" name="tPlace" color="7" fill="1" visible="yes" active="no"/>
-<layer number="22" name="bPlace" color="7" fill="1" visible="yes" active="no"/>
-<layer number="23" name="tOrigins" color="15" fill="1" visible="yes" active="no"/>
-<layer number="24" name="bOrigins" color="15" fill="1" visible="yes" active="no"/>
-<layer number="25" name="tNames" color="7" fill="1" visible="yes" active="no"/>
-<layer number="26" name="bNames" color="7" fill="1" visible="yes" active="no"/>
-<layer number="27" name="tValues" color="7" fill="1" visible="yes" active="no"/>
-<layer number="28" name="bValues" color="7" fill="1" visible="yes" active="no"/>
+<layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
+<layer number="16" name="Bottom" color="1" fill="1" visible="no" active="no"/>
+<layer number="17" name="Pads" color="2" fill="1" visible="no" active="no"/>
+<layer number="18" name="Vias" color="2" fill="1" visible="no" active="no"/>
+<layer number="19" name="Unrouted" color="6" fill="1" visible="no" active="no"/>
+<layer number="20" name="Dimension" color="15" fill="1" visible="no" active="no"/>
+<layer number="21" name="tPlace" color="7" fill="1" visible="no" active="no"/>
+<layer number="22" name="bPlace" color="7" fill="1" visible="no" active="no"/>
+<layer number="23" name="tOrigins" color="15" fill="1" visible="no" active="no"/>
+<layer number="24" name="bOrigins" color="15" fill="1" visible="no" active="no"/>
+<layer number="25" name="tNames" color="7" fill="1" visible="no" active="no"/>
+<layer number="26" name="bNames" color="7" fill="1" visible="no" active="no"/>
+<layer number="27" name="tValues" color="7" fill="1" visible="no" active="no"/>
+<layer number="28" name="bValues" color="7" fill="1" visible="no" active="no"/>
 <layer number="29" name="tStop" color="7" fill="3" visible="no" active="no"/>
 <layer number="30" name="bStop" color="7" fill="6" visible="no" active="no"/>
 <layer number="31" name="tCream" color="7" fill="4" visible="no" active="no"/>
@@ -30,8 +30,8 @@
 <layer number="34" name="bFinish" color="6" fill="6" visible="no" active="no"/>
 <layer number="35" name="tGlue" color="7" fill="4" visible="no" active="no"/>
 <layer number="36" name="bGlue" color="7" fill="5" visible="no" active="no"/>
-<layer number="37" name="tTest" color="7" fill="1" visible="yes" active="no"/>
-<layer number="38" name="bTest" color="7" fill="1" visible="yes" active="no"/>
+<layer number="37" name="tTest" color="7" fill="1" visible="no" active="no"/>
+<layer number="38" name="bTest" color="7" fill="1" visible="no" active="no"/>
 <layer number="39" name="tKeepout" color="4" fill="11" visible="no" active="no"/>
 <layer number="40" name="bKeepout" color="1" fill="6" visible="no" active="no"/>
 <layer number="41" name="tRestrict" color="4" fill="10" visible="no" active="no"/>
@@ -39,16 +39,16 @@
 <layer number="43" name="vRestrict" color="2" fill="10" visible="no" active="no"/>
 <layer number="44" name="Drills" color="7" fill="1" visible="no" active="no"/>
 <layer number="45" name="Holes" color="7" fill="1" visible="no" active="no"/>
-<layer number="46" name="Milling" color="3" fill="1" visible="yes" active="no"/>
-<layer number="47" name="Measures" color="7" fill="1" visible="yes" active="no"/>
-<layer number="48" name="Document" color="7" fill="1" visible="yes" active="no"/>
-<layer number="49" name="Reference" color="7" fill="1" visible="yes" active="no"/>
-<layer number="50" name="dxf" color="7" fill="1" visible="yes" active="no"/>
-<layer number="51" name="tDocu" color="14" fill="9" visible="yes" active="no"/>
-<layer number="52" name="bDocu" color="13" fill="9" visible="yes" active="no"/>
-<layer number="53" name="tGND_GNDA" color="7" fill="9" visible="yes" active="no"/>
-<layer number="54" name="bGND_GNDA" color="1" fill="9" visible="yes" active="no"/>
-<layer number="56" name="wert" color="7" fill="1" visible="yes" active="no"/>
+<layer number="46" name="Milling" color="3" fill="1" visible="no" active="no"/>
+<layer number="47" name="Measures" color="7" fill="1" visible="no" active="no"/>
+<layer number="48" name="Document" color="7" fill="1" visible="no" active="no"/>
+<layer number="49" name="Reference" color="7" fill="1" visible="no" active="no"/>
+<layer number="50" name="dxf" color="7" fill="1" visible="no" active="no"/>
+<layer number="51" name="tDocu" color="14" fill="9" visible="no" active="no"/>
+<layer number="52" name="bDocu" color="13" fill="9" visible="no" active="no"/>
+<layer number="53" name="tGND_GNDA" color="7" fill="9" visible="no" active="no"/>
+<layer number="54" name="bGND_GNDA" color="1" fill="9" visible="no" active="no"/>
+<layer number="56" name="wert" color="7" fill="1" visible="no" active="no"/>
 <layer number="91" name="Nets" color="2" fill="1" visible="yes" active="yes"/>
 <layer number="92" name="Busses" color="1" fill="1" visible="yes" active="yes"/>
 <layer number="93" name="Pins" color="2" fill="1" visible="no" active="yes"/>
@@ -3299,35 +3299,6 @@ Yageo reflow footprint dimensions</description>
 <vertex x="0.475" y="1.5" curve="90"/>
 </polygon>
 </package>
-<package name="0402_LED">
-<wire x1="-0.1" y1="0.55" x2="0.1" y2="0.55" width="0.1" layer="51"/>
-<wire x1="0" y1="0.5" x2="-0.1" y2="0.35" width="0.1" layer="51"/>
-<wire x1="-0.1" y1="0.35" x2="0" y2="0.35" width="0.1" layer="51"/>
-<wire x1="0" y1="0.35" x2="0.1" y2="0.35" width="0.1" layer="51"/>
-<wire x1="0.1" y1="0.35" x2="0" y2="0.5" width="0.1" layer="51"/>
-<wire x1="0" y1="0.35" x2="0" y2="0.25" width="0.1" layer="51"/>
-<wire x1="0" y1="0.35" x2="0" y2="0.65" width="0.1" layer="51"/>
-<wire x1="-0.3" y1="0.4" x2="-0.2" y2="0.5" width="0.01" layer="51" curve="90"/>
-<wire x1="-0.2" y1="0.5" x2="0.2" y2="0.5" width="0.01" layer="51"/>
-<wire x1="0.2" y1="0.5" x2="0.3" y2="0.4" width="0.01" layer="51" curve="90"/>
-<wire x1="0.3" y1="0.4" x2="0.3" y2="-0.4" width="0.01" layer="51"/>
-<wire x1="0.3" y1="-0.4" x2="0.2" y2="-0.5" width="0.01" layer="51" curve="90"/>
-<wire x1="0.2" y1="-0.5" x2="-0.2" y2="-0.5" width="0.01" layer="51"/>
-<wire x1="-0.2" y1="-0.5" x2="-0.3" y2="-0.4" width="0.01" layer="51" curve="90"/>
-<wire x1="-0.3" y1="-0.4" x2="-0.3" y2="0.4" width="0.01" layer="51"/>
-<smd name="A" x="0" y="-0.45" dx="0.6" dy="0.5" layer="1" thermals="no"/>
-<smd name="C" x="0" y="0.45" dx="0.6" dy="0.5" layer="1" thermals="no"/>
-<polygon width="0" layer="51">
-<vertex x="-0.3" y="0.03"/>
-<vertex x="-0.2" y="0.03"/>
-<vertex x="-0.2" y="0.1"/>
-<vertex x="0.2" y="0.1"/>
-<vertex x="0.2" y="0.03"/>
-<vertex x="0.3" y="0.03"/>
-<vertex x="0.3" y="-0.1"/>
-<vertex x="-0.3" y="-0.1"/>
-</polygon>
-</package>
 <package name="1206_LITE-ON_RM">
 <smd name="A" x="-1.7" y="0" dx="1" dy="1.6" layer="1" thermals="no"/>
 <smd name="K" x="1.7" y="0" dx="1" dy="1.6" layer="1" thermals="no"/>
@@ -3932,26 +3903,6 @@ Common LED footprint.  Often called Piranha after Cree 'Piranha' CP42B.</descrip
 <rectangle x1="1.9" y1="-1.4" x2="3.3" y2="1.4" layer="51"/>
 <rectangle x1="-5.2" y1="5.6" x2="5.2" y2="14.6" layer="51"/>
 </package>
-<package name="TO-252AA-3-BIGBARE">
-<description>IRFR7546 - TO-252AA footprint</description>
-<smd name="3D" x="0" y="6" dx="7" dy="8" layer="1" thermals="no" cream="no"/>
-<smd name="1G" x="-2.29" y="0.1" dx="1.5" dy="2.25" layer="1" thermals="no" cream="no"/>
-<smd name="2S" x="1.75" y="0.1" dx="3.5" dy="2.25" layer="1" thermals="no" cream="no"/>
-<rectangle x1="-2.16" y1="3.74" x2="2.16" y2="9.33" layer="51"/>
-<rectangle x1="-2.86" y1="-0.78" x2="-1.72" y2="1" layer="51"/>
-<rectangle x1="1.72" y1="-0.78" x2="2.86" y2="1" layer="51"/>
-<wire x1="-3.25" y1="1.96" x2="3.25" y2="1.96" width="0.25" layer="51"/>
-<wire x1="3.25" y1="1.96" x2="3.25" y2="8.06" width="0.25" layer="51"/>
-<wire x1="3.25" y1="8.06" x2="-3.25" y2="8.06" width="0.25" layer="51"/>
-<wire x1="-3.25" y1="8.06" x2="-3.25" y2="1.96" width="0.25" layer="51"/>
-<wire x1="3.365" y1="-0.78" x2="3.365" y2="9.63" width="0.25" layer="49"/>
-<wire x1="-3.365" y1="-0.78" x2="-3.365" y2="9.63" width="0.25" layer="49"/>
-<wire x1="-3.365" y1="9.63" x2="3.365" y2="9.63" width="0.25" layer="49"/>
-<wire x1="-3.365" y1="-0.78" x2="3.365" y2="-0.78" width="0.25" layer="49"/>
-<rectangle x1="1.575" y1="-1" x2="3.025" y2="1.2" layer="31"/>
-<rectangle x1="-2.75" y1="2.5" x2="2.75" y2="9.7" layer="31"/>
-<rectangle x1="-3.025" y1="-1" x2="-1.575" y2="1.2" layer="31"/>
-</package>
 <package name="MLF_5X5-0.5MM">
 <wire x1="-2.5" y1="2.5" x2="-2.5" y2="2" width="0.25" layer="21"/>
 <wire x1="-2.5" y1="2" x2="-2.5" y2="1.5" width="0.25" layer="21"/>
@@ -4023,6 +3974,291 @@ Common LED footprint.  Often called Piranha after Cree 'Piranha' CP42B.</descrip
 <circle x="0" y="0" radius="6.1" width="0" layer="51"/>
 <pad name="1" x="-2.5" y="0" drill="0.8" shape="square" thermals="no"/>
 <pad name="2" x="2.5" y="0" drill="0.8" shape="square" thermals="no"/>
+</package>
+<package name="OARS_XP_KELVIN">
+<smd name="P1@1" x="-3.5" y="2.15" dx="3.8" dy="2.8" layer="1" thermals="no"/>
+<smd name="P1@2" x="-3.5" y="-2.15" dx="3.8" dy="2.8" layer="1" thermals="no"/>
+<smd name="P2@1" x="3.5" y="2.15" dx="3.8" dy="2.8" layer="1" thermals="no"/>
+<smd name="P2@2" x="3.5" y="-2.15" dx="3.8" dy="2.8" layer="1" thermals="no"/>
+<smd name="P1@3" x="-3.2" y="0" dx="3.2" dy="0.5" layer="1" thermals="no"/>
+<smd name="P2@3" x="3.2" y="0" dx="3.2" dy="0.5" layer="1" thermals="no"/>
+<rectangle x1="-6" y1="-3.3" x2="6" y2="3.3" layer="51"/>
+<rectangle x1="-4.8" y1="0.25" x2="-1.6" y2="0.75" layer="41"/>
+<rectangle x1="-4.8" y1="-0.75" x2="-1.6" y2="-0.25" layer="41"/>
+<rectangle x1="1.6" y1="0.25" x2="4.8" y2="0.75" layer="41"/>
+<rectangle x1="1.6" y1="-0.75" x2="4.8" y2="-0.25" layer="41"/>
+</package>
+<package name="1225_VISHAY">
+<smd name="1" x="0" y="1.5" dx="7.6" dy="1.8" layer="1" thermals="no"/>
+<smd name="2" x="0" y="-1.5" dx="7.6" dy="1.8" layer="1" thermals="no"/>
+<rectangle x1="-3.15" y1="-1.6" x2="3.15" y2="1.6" layer="51"/>
+</package>
+<package name="TO-126-2">
+<pad name="K@1" x="-2.54" y="0" drill="1.2" shape="square" rot="R90" thermals="no"/>
+<pad name="A@1" x="2.54" y="0" drill="1.2" shape="square" rot="R90" thermals="no"/>
+<wire x1="-4" y1="1.75" x2="4" y2="1.75" width="0.25" layer="21"/>
+<wire x1="4" y1="1.75" x2="4" y2="-1" width="0.25" layer="21"/>
+<wire x1="1" y1="-1" x2="-1" y2="-1" width="0.25" layer="21"/>
+<wire x1="-4" y1="-1" x2="-4" y2="1.75" width="0.25" layer="21"/>
+<rectangle x1="-2.94" y1="-0.325" x2="-2.14" y2="0.325" layer="51"/>
+<rectangle x1="2.14" y1="-0.325" x2="2.94" y2="0.325" layer="51"/>
+<rectangle x1="-4.06" y1="-1" x2="4.06" y2="1.8" layer="51"/>
+</package>
+<package name="0402_LED">
+<wire x1="-0.1" y1="0.55" x2="0.1" y2="0.55" width="0.1" layer="51"/>
+<wire x1="0" y1="0.5" x2="-0.1" y2="0.35" width="0.1" layer="51"/>
+<wire x1="-0.1" y1="0.35" x2="0" y2="0.35" width="0.1" layer="51"/>
+<wire x1="0" y1="0.35" x2="0.1" y2="0.35" width="0.1" layer="51"/>
+<wire x1="0.1" y1="0.35" x2="0" y2="0.5" width="0.1" layer="51"/>
+<wire x1="0" y1="0.35" x2="0" y2="0.25" width="0.1" layer="51"/>
+<wire x1="0" y1="0.35" x2="0" y2="0.65" width="0.1" layer="51"/>
+<wire x1="-0.3" y1="0.4" x2="-0.2" y2="0.5" width="0.01" layer="51" curve="90"/>
+<wire x1="-0.2" y1="0.5" x2="0.2" y2="0.5" width="0.01" layer="51"/>
+<wire x1="0.2" y1="0.5" x2="0.3" y2="0.4" width="0.01" layer="51" curve="90"/>
+<wire x1="0.3" y1="0.4" x2="0.3" y2="-0.4" width="0.01" layer="51"/>
+<wire x1="0.3" y1="-0.4" x2="0.2" y2="-0.5" width="0.01" layer="51" curve="90"/>
+<wire x1="0.2" y1="-0.5" x2="-0.2" y2="-0.5" width="0.01" layer="51"/>
+<wire x1="-0.2" y1="-0.5" x2="-0.3" y2="-0.4" width="0.01" layer="51" curve="90"/>
+<wire x1="-0.3" y1="-0.4" x2="-0.3" y2="0.4" width="0.01" layer="51"/>
+<smd name="A" x="0" y="-0.5" dx="0.6" dy="0.5" layer="1" thermals="no"/>
+<smd name="C" x="0" y="0.5" dx="0.6" dy="0.5" layer="1" thermals="no"/>
+<polygon width="0" layer="51">
+<vertex x="-0.3" y="0.03"/>
+<vertex x="-0.2" y="0.03"/>
+<vertex x="-0.2" y="0.1"/>
+<vertex x="0.2" y="0.1"/>
+<vertex x="0.2" y="0.03"/>
+<vertex x="0.3" y="0.03"/>
+<vertex x="0.3" y="-0.1"/>
+<vertex x="-0.3" y="-0.1"/>
+</polygon>
+</package>
+<package name="XLAMP_MK-R">
+<wire x1="4" y1="3.5" x2="4" y2="-3" width="0.25" layer="21"/>
+<wire x1="4" y1="-3" x2="4" y2="-3.5" width="0.25" layer="21"/>
+<wire x1="-4" y1="-3.5" x2="-4" y2="3.5" width="0.25" layer="21"/>
+<wire x1="-3.5" y1="3.5" x2="3.5" y2="3.5" width="0.25" layer="51"/>
+<wire x1="3.5" y1="3.5" x2="3.5" y2="-3.5" width="0.25" layer="51"/>
+<wire x1="3.5" y1="-3.5" x2="-3.5" y2="-3.5" width="0.25" layer="51"/>
+<wire x1="-3.5" y1="-3.5" x2="-3.5" y2="3.5" width="0.25" layer="51"/>
+<circle x="0" y="0" radius="3.25" width="0.25" layer="51"/>
+<smd name="C" x="-3.15" y="0" dx="1" dy="6.7" layer="1" thermals="no" cream="no"/>
+<smd name="A" x="3.15" y="0" dx="1" dy="6.7" layer="1" thermals="no" cream="no"/>
+<smd name="T" x="0" y="0" dx="3.9" dy="6.7" layer="1" thermals="no" cream="no"/>
+<rectangle x1="-3.275" y1="-2.635" x2="-2.725" y2="2.635" layer="31"/>
+<rectangle x1="2.725" y1="-2.635" x2="3.275" y2="2.635" layer="31"/>
+<rectangle x1="-1.5" y1="-2.635" x2="1.5" y2="2.635" layer="31"/>
+<circle x="-3" y="-3" radius="0.25" width="0" layer="51"/>
+<circle x="3" y="3" radius="0.25" width="0" layer="51"/>
+<wire x1="2.75" y1="-3" x2="3.25" y2="-3" width="0.25" layer="51"/>
+<wire x1="3" y1="-2.75" x2="3" y2="-3.25" width="0.25" layer="51"/>
+<circle x="-4.5" y="-3" radius="0.5" width="0" layer="21"/>
+<circle x="4.5" y="3" radius="0.5" width="0" layer="21"/>
+<wire x1="4.5" y1="-3" x2="5" y2="-3" width="0.25" layer="21"/>
+<wire x1="4.5" y1="-2.5" x2="4.5" y2="-3" width="0.25" layer="21"/>
+<wire x1="4.5" y1="-3" x2="4.5" y2="-3.5" width="0.25" layer="21"/>
+<wire x1="4" y1="-3" x2="4.5" y2="-3" width="0.25" layer="21"/>
+</package>
+<package name="OPTO_IFE91">
+<pad name="K" x="1.27" y="0" drill="1" shape="square" thermals="no"/>
+<pad name="A" x="-1.27" y="0" drill="1" shape="square" thermals="no"/>
+<hole x="-2.54" y="2.54" drill="1.6"/>
+<hole x="2.54" y="2.54" drill="1.6"/>
+<hole x="0" y="-5.08" drill="3.05"/>
+<wire x1="-3.875" y1="3.6" x2="3.875" y2="3.6" width="0.25" layer="51"/>
+<wire x1="4" y1="3.5" x2="4" y2="-2.575953125" width="0.25" layer="21"/>
+<wire x1="4" y1="-2.575953125" x2="3.882471875" y2="-3.40743125" width="0.25" layer="21" curve="-16.09074"/>
+<wire x1="3.882471875" y1="-3.40743125" x2="3.125534375" y2="-6.03148125" width="0.25" layer="21"/>
+<wire x1="3.125534375" y1="-6.03148125" x2="0.2430625" y2="-8.2" width="0.25" layer="21" curve="-73.909202"/>
+<wire x1="0.2430625" y1="-8.2" x2="-0.2430625" y2="-8.2" width="0.25" layer="21"/>
+<wire x1="-0.2430625" y1="-8.2" x2="-3.125534375" y2="-6.03148125" width="0.25" layer="21" curve="-73.909202"/>
+<wire x1="-3.125534375" y1="-6.03148125" x2="-3.882471875" y2="-3.40743125" width="0.25" layer="21"/>
+<wire x1="-3.882471875" y1="-3.40743125" x2="-4" y2="-2.575953125" width="0.25" layer="21" curve="-16.090738"/>
+<wire x1="-4" y1="-2.575953125" x2="-4" y2="3.5" width="0.25" layer="21"/>
+<rectangle x1="-4.6" y1="5.8" x2="4.6" y2="16.8" layer="51"/>
+<wire x1="-3.875" y1="3.6" x2="-3.875" y2="5.8" width="0.25" layer="51"/>
+<wire x1="3.875" y1="3.6" x2="3.875" y2="5.8" width="0.25" layer="51"/>
+</package>
+<package name="IKON_VERSACOMA_10MM">
+<wire x1="-1" y1="1" x2="0" y2="2" width="1" layer="21"/>
+<wire x1="0" y1="2" x2="1" y2="1" width="1" layer="21"/>
+<wire x1="1" y1="1" x2="0" y2="0" width="1" layer="21"/>
+<wire x1="0" y1="0" x2="-1" y2="1" width="1" layer="21"/>
+<wire x1="0" y1="4" x2="-3" y2="1" width="1" layer="21"/>
+<wire x1="-3" y1="1" x2="0" y2="-2" width="1" layer="21"/>
+<wire x1="0" y1="-2" x2="3" y2="1" width="1" layer="21"/>
+<wire x1="-4" y1="0" x2="-2" y2="-2" width="1" layer="21"/>
+<wire x1="-2" y1="-2" x2="0" y2="-4" width="1" layer="21"/>
+<wire x1="0" y1="-4" x2="1" y2="-3" width="1" layer="21"/>
+<wire x1="1" y1="-3" x2="2" y2="-2" width="1" layer="21"/>
+<wire x1="2" y1="-2" x2="4" y2="0" width="1" layer="21"/>
+<wire x1="-2" y1="-2" x2="-4" y2="-4" width="1" layer="21"/>
+<wire x1="2" y1="-2" x2="3" y2="-3" width="1" layer="21"/>
+<wire x1="3" y1="-3" x2="4" y2="-4" width="1" layer="21"/>
+<wire x1="1" y1="-3" x2="2" y2="-4" width="1" layer="21"/>
+<wire x1="2" y1="-4" x2="3" y2="-3" width="1" layer="21"/>
+</package>
+<package name="IKON_VERSACOMA_5MM">
+<wire x1="-0.5" y1="0.5" x2="0" y2="1" width="0.5" layer="21"/>
+<wire x1="0" y1="1" x2="0.5" y2="0.5" width="0.5" layer="21"/>
+<wire x1="0.5" y1="0.5" x2="0" y2="0" width="0.5" layer="21"/>
+<wire x1="0" y1="0" x2="-0.5" y2="0.5" width="0.5" layer="21"/>
+<wire x1="-1.5" y1="0.5" x2="0" y2="-1" width="0.5" layer="21"/>
+<wire x1="0" y1="-1" x2="1.5" y2="0.5" width="0.5" layer="21"/>
+<wire x1="-1.5" y1="0.5" x2="0" y2="2" width="0.5" layer="21"/>
+<wire x1="-2" y1="0" x2="-1" y2="-1" width="0.5" layer="21"/>
+<wire x1="-1" y1="-1" x2="0" y2="-2" width="0.5" layer="21"/>
+<wire x1="0" y1="-2" x2="0.5" y2="-1.5" width="0.5" layer="21"/>
+<wire x1="0.5" y1="-1.5" x2="1" y2="-1" width="0.5" layer="21"/>
+<wire x1="1" y1="-1" x2="2" y2="0" width="0.5" layer="21"/>
+<wire x1="-1" y1="-1" x2="-2" y2="-2" width="0.5" layer="21"/>
+<wire x1="1" y1="-1" x2="1.5" y2="-1.5" width="0.5" layer="21"/>
+<wire x1="1.5" y1="-1.5" x2="2" y2="-2" width="0.5" layer="21"/>
+<wire x1="0.5" y1="-1.5" x2="1" y2="-2" width="0.5" layer="21"/>
+<wire x1="1" y1="-2" x2="1.5" y2="-1.5" width="0.5" layer="21"/>
+</package>
+<package name="IKON_VERSACOMA_2.5MM">
+<wire x1="-0.25" y1="0.25" x2="0" y2="0.5" width="0.25" layer="1"/>
+<wire x1="0" y1="0.5" x2="0.25" y2="0.25" width="0.25" layer="1"/>
+<wire x1="0.25" y1="0.25" x2="0" y2="0" width="0.25" layer="1"/>
+<wire x1="0" y1="0" x2="-0.25" y2="0.25" width="0.25" layer="1"/>
+<wire x1="0" y1="1" x2="-0.75" y2="0.25" width="0.25" layer="1"/>
+<wire x1="-0.75" y1="0.25" x2="0" y2="-0.5" width="0.25" layer="1"/>
+<wire x1="0" y1="-0.5" x2="0.75" y2="0.25" width="0.25" layer="1"/>
+<wire x1="-1" y1="0" x2="-0.5" y2="-0.5" width="0.25" layer="1"/>
+<wire x1="-0.5" y1="-0.5" x2="0" y2="-1" width="0.25" layer="1"/>
+<wire x1="0" y1="-1" x2="0.25" y2="-0.75" width="0.25" layer="1"/>
+<wire x1="0.25" y1="-0.75" x2="0.5" y2="-0.5" width="0.25" layer="1"/>
+<wire x1="0.5" y1="-0.5" x2="1" y2="0" width="0.25" layer="1"/>
+<wire x1="-0.5" y1="-0.5" x2="-1" y2="-1" width="0.25" layer="1"/>
+<wire x1="0.5" y1="-0.5" x2="0.75" y2="-0.75" width="0.25" layer="1"/>
+<wire x1="0.75" y1="-0.75" x2="1" y2="-1" width="0.25" layer="1"/>
+<wire x1="0.25" y1="-0.75" x2="0.5" y2="-1" width="0.25" layer="1"/>
+<wire x1="0.5" y1="-1" x2="0.75" y2="-0.75" width="0.25" layer="1"/>
+<wire x1="0" y1="1" x2="-0.75" y2="0.25" width="0.275" layer="29"/>
+<wire x1="-0.75" y1="0.25" x2="0" y2="-0.5" width="0.275" layer="29"/>
+<wire x1="0" y1="-0.5" x2="0.75" y2="0.25" width="0.275" layer="29"/>
+<wire x1="-0.25" y1="0.25" x2="0" y2="0.5" width="0.275" layer="29"/>
+<wire x1="0" y1="0.5" x2="0.25" y2="0.25" width="0.275" layer="29"/>
+<wire x1="0.25" y1="0.25" x2="0" y2="0" width="0.275" layer="29"/>
+<wire x1="0" y1="0" x2="-0.25" y2="0.25" width="0.275" layer="29"/>
+<wire x1="-1" y1="0" x2="-0.5" y2="-0.5" width="0.275" layer="29"/>
+<wire x1="-0.5" y1="-0.5" x2="0" y2="-1" width="0.275" layer="29"/>
+<wire x1="0" y1="-1" x2="0.25" y2="-0.75" width="0.275" layer="29"/>
+<wire x1="0.25" y1="-0.75" x2="0.5" y2="-0.5" width="0.275" layer="29"/>
+<wire x1="0.5" y1="-0.5" x2="1" y2="0" width="0.275" layer="29"/>
+<wire x1="0.5" y1="-0.5" x2="0.75" y2="-0.75" width="0.275" layer="29"/>
+<wire x1="0.75" y1="-0.75" x2="1" y2="-1" width="0.275" layer="29"/>
+<wire x1="0.25" y1="-0.75" x2="0.5" y2="-1" width="0.275" layer="29"/>
+<wire x1="0.5" y1="-1" x2="0.75" y2="-0.75" width="0.275" layer="29"/>
+<wire x1="-1" y1="-1" x2="-0.5" y2="-0.5" width="0.275" layer="29"/>
+<wire x1="-1.25" y1="-1" x2="-1.25" y2="0.021446875" width="0" layer="41"/>
+<wire x1="-1.25" y1="0.021446875" x2="-1.176778125" y2="0.198221875" width="0" layer="41" curve="-44.999494"/>
+<wire x1="-1.176778125" y1="0.198221875" x2="-0.176778125" y2="1.198221875" width="0" layer="41"/>
+<wire x1="-0.176778125" y1="1.198221875" x2="0.176778125" y2="1.198221875" width="0" layer="41" curve="-90"/>
+<wire x1="0.176778125" y1="1.198221875" x2="1.176778125" y2="0.198221875" width="0" layer="41"/>
+<wire x1="1.176778125" y1="0.198221875" x2="1.25" y2="0.021446875" width="0" layer="41" curve="-44.999284"/>
+<wire x1="1.25" y1="0.021446875" x2="1.25" y2="-1" width="0" layer="41"/>
+<wire x1="1.25" y1="-1" x2="1" y2="-1.25" width="0" layer="41" curve="-90"/>
+<wire x1="1" y1="-1.25" x2="-1" y2="-1.25" width="0" layer="41"/>
+<wire x1="-1" y1="-1.25" x2="-1.25" y2="-1" width="0" layer="41" curve="-90"/>
+</package>
+<package name="IKON_VERSACOMA_2.5MM-MASK">
+<wire x1="0" y1="1" x2="-0.75" y2="0.25" width="0.275" layer="29"/>
+<wire x1="-0.75" y1="0.25" x2="0" y2="-0.5" width="0.275" layer="29"/>
+<wire x1="0" y1="-0.5" x2="0.75" y2="0.25" width="0.275" layer="29"/>
+<wire x1="-0.25" y1="0.25" x2="0" y2="0.5" width="0.275" layer="29"/>
+<wire x1="0" y1="0.5" x2="0.25" y2="0.25" width="0.275" layer="29"/>
+<wire x1="0.25" y1="0.25" x2="0" y2="0" width="0.275" layer="29"/>
+<wire x1="0" y1="0" x2="-0.25" y2="0.25" width="0.275" layer="29"/>
+<wire x1="-1" y1="0" x2="-0.5" y2="-0.5" width="0.275" layer="29"/>
+<wire x1="-0.5" y1="-0.5" x2="0" y2="-1" width="0.275" layer="29"/>
+<wire x1="0" y1="-1" x2="0.25" y2="-0.75" width="0.275" layer="29"/>
+<wire x1="0.25" y1="-0.75" x2="0.5" y2="-0.5" width="0.275" layer="29"/>
+<wire x1="0.5" y1="-0.5" x2="1" y2="0" width="0.275" layer="29"/>
+<wire x1="0.5" y1="-0.5" x2="0.75" y2="-0.75" width="0.275" layer="29"/>
+<wire x1="0.75" y1="-0.75" x2="1" y2="-1" width="0.275" layer="29"/>
+<wire x1="0.25" y1="-0.75" x2="0.5" y2="-1" width="0.275" layer="29"/>
+<wire x1="0.5" y1="-1" x2="0.75" y2="-0.75" width="0.275" layer="29"/>
+<wire x1="-1" y1="-1" x2="-0.5" y2="-0.5" width="0.275" layer="29"/>
+</package>
+<package name="HEADER-0.1&quot;_2X4-TH-1.0MM">
+<pad name="4" x="-1.27" y="1.27" drill="1" shape="square" rot="R90" thermals="no"/>
+<pad name="5" x="1.27" y="-1.27" drill="1" shape="square" rot="R270" thermals="no"/>
+<pad name="3" x="-1.27" y="-1.27" drill="1" shape="square" rot="R270" thermals="no"/>
+<pad name="2" x="-3.81" y="1.27" drill="1" shape="square" rot="R90" thermals="no"/>
+<pad name="1" x="-3.81" y="-1.27" drill="1" shape="octagon" rot="R270" thermals="no"/>
+<pad name="6" x="1.27" y="1.27" drill="1" shape="square" rot="R90" thermals="no"/>
+<pad name="7" x="3.81" y="-1.27" drill="1" shape="square" rot="R270" thermals="no"/>
+<pad name="8" x="3.81" y="1.27" drill="1" shape="square" rot="R90" thermals="no"/>
+<rectangle x1="-5.08" y1="-2.54" x2="5.08" y2="2.54" layer="51"/>
+<wire x1="-5.25" y1="2.75" x2="-5.25" y2="-2" width="0.25" layer="21"/>
+<wire x1="-5.25" y1="-2" x2="-5.25" y2="-2.25" width="0.25" layer="21"/>
+<wire x1="-5.25" y1="-2.25" x2="-5.25" y2="-2.5" width="0.25" layer="21"/>
+<wire x1="-5.25" y1="-2.5" x2="-5.25" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="-5.25" y1="-2.75" x2="-5" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="-5" y1="-2.75" x2="-4.75" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="-4.75" y1="2.75" x2="-5.25" y2="2.75" width="0.25" layer="21"/>
+<wire x1="-2.75" y1="2.75" x2="-2.25" y2="2.75" width="0.25" layer="21"/>
+<wire x1="-0.25" y1="2.75" x2="0.25" y2="2.75" width="0.25" layer="21"/>
+<wire x1="2.25" y1="2.75" x2="2.75" y2="2.75" width="0.25" layer="21"/>
+<wire x1="-2.75" y1="-2.75" x2="-2.25" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="-0.25" y1="-2.75" x2="0.25" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="2.25" y1="-2.75" x2="2.75" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="4.75" y1="-2.75" x2="5.25" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="5.25" y1="-2.75" x2="5.25" y2="2.75" width="0.25" layer="21"/>
+<wire x1="5.25" y1="2.75" x2="4.75" y2="2.75" width="0.25" layer="21"/>
+<wire x1="-5.25" y1="-2.5" x2="-5" y2="-2.75" width="0.25" layer="21" curve="180"/>
+<wire x1="-5.25" y1="-2.25" x2="-4.75" y2="-2.75" width="0.25" layer="21" curve="180"/>
+<wire x1="-4.75" y1="-3" x2="-5.25" y2="-2" width="0.25" layer="21" curve="-180"/>
+<wire x1="-4.75" y1="-2.75" x2="-4.75" y2="-3" width="0.25" layer="21"/>
+</package>
+<package name="TO-252AA-3-BIGBARE">
+<description>IRFR7546 - TO-252AA footprint</description>
+<smd name="3D" x="0" y="6.125" dx="7" dy="7.75" layer="1" thermals="no" cream="no"/>
+<smd name="1G" x="-2.29" y="0.1" dx="1.5" dy="2.25" layer="1" thermals="no" cream="no"/>
+<smd name="2S" x="1.75" y="0.1" dx="3.5" dy="2.25" layer="1" thermals="no" cream="no"/>
+<rectangle x1="-2.16" y1="3.74" x2="2.16" y2="9.33" layer="51"/>
+<rectangle x1="-2.86" y1="-0.78" x2="-1.72" y2="1" layer="51"/>
+<rectangle x1="1.72" y1="-0.78" x2="2.86" y2="1" layer="51"/>
+<wire x1="-3.25" y1="1.96" x2="3.25" y2="1.96" width="0.25" layer="51"/>
+<wire x1="3.25" y1="1.96" x2="3.25" y2="8.06" width="0.25" layer="51"/>
+<wire x1="3.25" y1="8.06" x2="-3.25" y2="8.06" width="0.25" layer="51"/>
+<wire x1="-3.25" y1="8.06" x2="-3.25" y2="1.96" width="0.25" layer="51"/>
+<wire x1="3.365" y1="-0.78" x2="3.365" y2="9.63" width="0.25" layer="49"/>
+<wire x1="-3.365" y1="-0.78" x2="-3.365" y2="9.63" width="0.25" layer="49"/>
+<wire x1="-3.365" y1="9.63" x2="3.365" y2="9.63" width="0.25" layer="49"/>
+<wire x1="-3.365" y1="-0.78" x2="3.365" y2="-0.78" width="0.25" layer="49"/>
+<rectangle x1="1.575" y1="-1" x2="3.025" y2="1.2" layer="31"/>
+<rectangle x1="-2.75" y1="2.5" x2="2.75" y2="9.7" layer="31"/>
+<rectangle x1="-3.025" y1="-1" x2="-1.575" y2="1.2" layer="31"/>
+</package>
+<package name="TO-263/252-3-BARE">
+<smd name="1G" x="-2.5" y="0.25" dx="3" dy="4.5" layer="1" thermals="no"/>
+<smd name="2S" x="2.5" y="0.25" dx="3" dy="4.5" layer="1" thermals="no"/>
+<smd name="3D" x="0" y="10" dx="12" dy="12" layer="1" thermals="no"/>
+<rectangle x1="-3.3" y1="-1.4" x2="-1.9" y2="1.4" layer="51"/>
+<rectangle x1="1.9" y1="-1.4" x2="3.3" y2="1.4" layer="51"/>
+<rectangle x1="-5.2" y1="5.6" x2="5.2" y2="14.6" layer="51"/>
+<rectangle x1="-2.75" y1="4.7" x2="2.75" y2="10.5" layer="51"/>
+<rectangle x1="-2.9" y1="0" x2="-1.7" y2="2" layer="51"/>
+<rectangle x1="1.7" y1="0" x2="2.9" y2="2" layer="51"/>
+</package>
+<package name="TO-263-7-BARE">
+<smd name="G" x="-3.81" y="0" dx="0.9" dy="4" layer="1" thermals="no"/>
+<smd name="S@0" x="-2.54" y="0" dx="0.9" dy="4" layer="1" thermals="no"/>
+<smd name="S@1" x="-1.27" y="0" dx="0.9" dy="4" layer="1" thermals="no"/>
+<smd name="S@2" x="1.27" y="0" dx="0.9" dy="4" layer="1" thermals="no"/>
+<smd name="S@3" x="2.54" y="0" dx="0.9" dy="4" layer="1" thermals="no"/>
+<smd name="S@4" x="3.81" y="0" dx="0.9" dy="4" layer="1" thermals="no"/>
+<smd name="D" x="0" y="10.2" dx="12" dy="11" layer="1" thermals="no"/>
+<rectangle x1="-1.6256" y1="-1.143" x2="-0.9144" y2="1.143" layer="51"/>
+<rectangle x1="-2.8956" y1="-1.143" x2="-2.1844" y2="1.143" layer="51"/>
+<rectangle x1="-4.1656" y1="-1.143" x2="-3.4544" y2="1.143" layer="51"/>
+<rectangle x1="0.9144" y1="-1.143" x2="1.6256" y2="1.143" layer="51"/>
+<rectangle x1="2.1844" y1="-1.143" x2="2.8956" y2="1.143" layer="51"/>
+<rectangle x1="3.4544" y1="-1.143" x2="4.1656" y2="1.143" layer="51"/>
+<rectangle x1="-5.08" y1="7.239" x2="5.08" y2="14.097" layer="51"/>
 </package>
 </packages>
 <symbols>
@@ -4284,6 +4520,33 @@ Common LED footprint.  Often called Piranha after Cree 'Piranha' CP42B.</descrip
 <technology name=""/>
 </technologies>
 </device>
+<device name="-OARS_XP_KELVIN" package="OARS_XP_KELVIN">
+<connects>
+<connect gate="G$1" pin="1" pad="P1@1 P1@2 P1@3"/>
+<connect gate="G$1" pin="2" pad="P2@1 P2@2 P2@3"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-1225" package="1225_VISHAY">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-TO-126" package="TO-126-2">
+<connects>
+<connect gate="G$1" pin="1" pad="A@1"/>
+<connect gate="G$1" pin="2" pad="K@1"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
 </devices>
 </deviceset>
 <deviceset name="CAPACITOR" prefix="C" uservalue="yes">
@@ -4461,6 +4724,42 @@ Common LED footprint.  Often called Piranha after Cree 'Piranha' CP42B.</descrip
 <technology name=""/>
 </technologies>
 </device>
+<device name="-MK-R" package="XLAMP_MK-R">
+<connects>
+<connect gate="G$1" pin="A" pad="A"/>
+<connect gate="G$1" pin="C" pad="C"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-IFE91" package="OPTO_IFE91">
+<connects>
+<connect gate="G$1" pin="A" pad="A"/>
+<connect gate="G$1" pin="C" pad="K"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-1206" package="1206_YAGEO">
+<connects>
+<connect gate="G$1" pin="A" pad="1"/>
+<connect gate="G$1" pin="C" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-0805" package="0805_YAGEO">
+<connects>
+<connect gate="G$1" pin="A" pad="1"/>
+<connect gate="G$1" pin="C" pad="2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
 </devices>
 </deviceset>
 <deviceset name="IKON" prefix="IKON">
@@ -4504,6 +4803,26 @@ Common LED footprint.  Often called Piranha after Cree 'Piranha' CP42B.</descrip
 </technologies>
 </device>
 <device name="LSM330" package="LSM330-AXES">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-VERSACOMA-10" package="IKON_VERSACOMA_10MM">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-VERSACOMA-5" package="IKON_VERSACOMA_5MM">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-VERSACOMA-2.5" package="IKON_VERSACOMA_2.5MM">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-VERSACOMA-2.5-MASK" package="IKON_VERSACOMA_2.5MM-MASK">
 <technologies>
 <technology name=""/>
 </technologies>
@@ -4649,6 +4968,21 @@ Common LED footprint.  Often called Piranha after Cree 'Piranha' CP42B.</descrip
 <technology name=""/>
 </technologies>
 </device>
+<device name="-0.1&quot;-2X4-TH" package="HEADER-0.1&quot;_2X4-TH-1.0MM">
+<connects>
+<connect gate="G$1" pin="1" pad="1"/>
+<connect gate="G$1" pin="2" pad="2"/>
+<connect gate="G$1" pin="3" pad="3"/>
+<connect gate="G$1" pin="4" pad="4"/>
+<connect gate="G$1" pin="5" pad="5"/>
+<connect gate="G$1" pin="6" pad="6"/>
+<connect gate="G$1" pin="7" pad="7"/>
+<connect gate="G$1" pin="8" pad="8"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
 </devices>
 </deviceset>
 <deviceset name="FET_N-CH" prefix="NF">
@@ -4761,6 +5095,26 @@ Common LED footprint.  Often called Piranha after Cree 'Piranha' CP42B.</descrip
 <connect gate="G$1" pin="D@0" pad="3D"/>
 <connect gate="G$1" pin="G" pad="1G"/>
 <connect gate="G$1" pin="S@0" pad="2S"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-TO-263/252-3-BARE" package="TO-263/252-3-BARE">
+<connects>
+<connect gate="G$1" pin="D@0" pad="3D"/>
+<connect gate="G$1" pin="G" pad="1G"/>
+<connect gate="G$1" pin="S@0" pad="2S"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-TO-263-7-BARE" package="TO-263-7-BARE">
+<connects>
+<connect gate="G$1" pin="D@0" pad="D"/>
+<connect gate="G$1" pin="G" pad="G"/>
+<connect gate="G$1" pin="S@0" pad="S@0 S@1 S@2 S@3 S@4"/>
 </connects>
 <technologies>
 <technology name=""/>
