@@ -3971,40 +3971,6 @@ Yageo reflow footprint dimensions</description>
 <rectangle x1="2.75" y1="0.4" x2="3.25" y2="2" layer="51"/>
 <rectangle x1="4.75" y1="0.4" x2="5.25" y2="2" layer="51"/>
 </package>
-<package name="HEADER-0.1&quot;_2X3-SMD-SULLINS">
-<smd name="1" x="-2.54" y="-3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="3" x="0" y="-3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="5" x="2.54" y="-3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="6" x="2.54" y="3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="4" x="0" y="3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="2" x="-2.54" y="3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<rectangle x1="-3.81" y1="-2.54" x2="3.81" y2="2.54" layer="51"/>
-<rectangle x1="-0.32" y1="-5.335" x2="0.32" y2="-0.95" layer="51"/>
-<rectangle x1="-2.86" y1="-5.335" x2="-2.22" y2="-0.95" layer="51"/>
-<rectangle x1="2.22" y1="-5.335" x2="2.86" y2="-0.95" layer="51"/>
-<rectangle x1="2.22" y1="0.95" x2="2.86" y2="5.335" layer="51"/>
-<rectangle x1="-0.32" y1="0.95" x2="0.32" y2="5.335" layer="51"/>
-<rectangle x1="-2.86" y1="0.95" x2="-2.22" y2="5.335" layer="51"/>
-<wire x1="-4" y1="2.75" x2="-4" y2="-2" width="0.25" layer="21"/>
-<wire x1="-4" y1="-2" x2="-4" y2="-2.25" width="0.25" layer="21"/>
-<wire x1="-4" y1="-2.25" x2="-4" y2="-2.5" width="0.25" layer="21"/>
-<wire x1="-4" y1="-2.5" x2="-4" y2="-2.75" width="0.25" layer="21"/>
-<wire x1="-4" y1="-2.75" x2="-3.75" y2="-2.75" width="0.25" layer="21"/>
-<wire x1="-3.75" y1="-2.75" x2="-3.5" y2="-2.75" width="0.25" layer="21"/>
-<wire x1="-3.5" y1="2.75" x2="-4" y2="2.75" width="0.25" layer="21"/>
-<wire x1="-1.5" y1="2.75" x2="-1" y2="2.75" width="0.25" layer="21"/>
-<wire x1="1" y1="2.75" x2="1.5" y2="2.75" width="0.25" layer="21"/>
-<wire x1="3.5" y1="2.75" x2="4" y2="2.75" width="0.25" layer="21"/>
-<wire x1="-1.5" y1="-2.75" x2="-1" y2="-2.75" width="0.25" layer="21"/>
-<wire x1="1" y1="-2.75" x2="1.5" y2="-2.75" width="0.25" layer="21"/>
-<wire x1="3.5" y1="-2.75" x2="4" y2="-2.75" width="0.25" layer="21"/>
-<wire x1="4" y1="-2.75" x2="4" y2="2.75" width="0.25" layer="21"/>
-<wire x1="-4" y1="-2.5" x2="-3.75" y2="-2.75" width="0.25" layer="21" curve="180"/>
-<wire x1="-4" y1="-2.25" x2="-4" y2="-2.75" width="0.25" layer="21" curve="87.753395"/>
-<wire x1="-4" y1="-2.75" x2="-3.5" y2="-2.75" width="0.25" layer="21" curve="92.246605"/>
-<wire x1="-3.5" y1="-3" x2="-4" y2="-2" width="0.25" layer="21" curve="-180"/>
-<wire x1="-3.5" y1="-2.75" x2="-3.5" y2="-3" width="0.25" layer="21"/>
-</package>
 <package name="0603_YAGEO">
 <description>&lt;b&gt;0603&lt;/b&gt;
 &lt;p&gt;
@@ -4335,14 +4301,14 @@ Common LED footprint.  Often called Piranha after Cree 'Piranha' CP42B.</descrip
 <wire x1="0.4" y1="4" x2="0.4" y2="4.15" width="0.25" layer="21"/>
 </package>
 <package name="HEADER-0.1&quot;_2X4-SMD-SULLINS">
-<smd name="1" x="-3.81" y="-3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="3" x="-1.27" y="-3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="5" x="1.27" y="-3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="7" x="3.81" y="-3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="8" x="3.81" y="3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="6" x="1.27" y="3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="4" x="-1.27" y="3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="2" x="-3.81" y="3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
+<smd name="1" x="-3.81" y="-3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="3" x="-1.27" y="-3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="5" x="1.27" y="-3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="7" x="3.81" y="-3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="8" x="3.81" y="3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="6" x="1.27" y="3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="4" x="-1.27" y="3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="2" x="-3.81" y="3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
 <rectangle x1="-5.08" y1="-2.54" x2="5.08" y2="2.54" layer="51"/>
 <rectangle x1="-1.59" y1="-5.335" x2="-0.95" y2="-0.95" layer="51"/>
 <rectangle x1="-4.13" y1="-5.335" x2="-3.49" y2="-0.95" layer="51"/>
@@ -5041,6 +5007,85 @@ Common LED footprint.  Often called Piranha after Cree 'Piranha' CP42B.</descrip
 <rectangle x1="-1.59" y1="-1.59" x2="-0.95" y2="-0.95" layer="51"/>
 <rectangle x1="3.49" y1="-1.59" x2="4.13" y2="-0.95" layer="51"/>
 <rectangle x1="0.95" y1="-1.59" x2="1.59" y2="-0.95" layer="51"/>
+</package>
+<package name="XLAMP_XHP35">
+<wire x1="2.25" y1="2" x2="2.25" y2="-1.5" width="0.25" layer="21"/>
+<wire x1="2.25" y1="-1.5" x2="2.25" y2="-2" width="0.25" layer="21"/>
+<wire x1="-2.25" y1="-2" x2="-2.25" y2="2" width="0.25" layer="21"/>
+<wire x1="-1.725" y1="1.725" x2="1.725" y2="1.725" width="0.25" layer="51"/>
+<wire x1="1.725" y1="1.725" x2="1.725" y2="-1.725" width="0.25" layer="51"/>
+<wire x1="1.725" y1="-1.725" x2="-1.725" y2="-1.725" width="0.25" layer="51"/>
+<wire x1="-1.725" y1="-1.725" x2="-1.725" y2="1.725" width="0.25" layer="51"/>
+<circle x="0" y="0" radius="1.725" width="0.25" layer="51"/>
+<smd name="C" x="-1.4" y="0" dx="0.5" dy="3.3" layer="1" thermals="no"/>
+<smd name="A" x="1.4" y="0" dx="0.5" dy="3.3" layer="1" thermals="no"/>
+<smd name="T" x="0" y="0" dx="1.3" dy="3.3" layer="1" thermals="no" cream="no"/>
+<rectangle x1="-0.5" y1="-1.5" x2="0.5" y2="1.5" layer="31"/>
+<wire x1="2.75" y1="-1.5" x2="3.25" y2="-1.5" width="0.25" layer="21"/>
+<wire x1="2.75" y1="-1" x2="2.75" y2="-1.5" width="0.25" layer="21"/>
+<wire x1="2.75" y1="-1.5" x2="2.75" y2="-2" width="0.25" layer="21"/>
+<wire x1="2.25" y1="-1.5" x2="2.75" y2="-1.5" width="0.25" layer="21"/>
+<wire x1="-0.75" y1="-1.75" x2="-0.75" y2="-1" width="0.25" layer="51"/>
+<wire x1="0.75" y1="-1.75" x2="0.75" y2="-1" width="0.25" layer="51"/>
+<polygon width="0.25" layer="51">
+<vertex x="0.75" y="0.5"/>
+<vertex x="0.75" y="-0.5"/>
+<vertex x="0" y="0"/>
+</polygon>
+</package>
+<package name="SOD923(0.2MM)">
+<smd name="A" x="-0.45" y="0" dx="0.3" dy="0.4" layer="1" thermals="no"/>
+<smd name="K" x="0.45" y="0" dx="0.3" dy="0.4" layer="1" thermals="no"/>
+<rectangle x1="-0.4" y1="-0.3" x2="0.4" y2="0.3" layer="51"/>
+</package>
+<package name="SOD323">
+<smd name="A" x="-1.055" y="0" dx="0.59" dy="0.45" layer="1" thermals="no"/>
+<smd name="K" x="1.055" y="0" dx="0.59" dy="0.45" layer="1" thermals="no"/>
+<rectangle x1="-0.85" y1="-0.65" x2="0.85" y2="0.65" layer="51"/>
+</package>
+<package name="SOD323F">
+<smd name="A" x="-0.995" y="0" dx="0.71" dy="0.403" layer="1" thermals="no"/>
+<smd name="K" x="0.995" y="0" dx="0.71" dy="0.403" layer="1" thermals="no"/>
+<rectangle x1="-0.85" y1="-0.625" x2="0.85" y2="0.625" layer="51"/>
+</package>
+<package name="SOD523">
+<smd name="A" x="-0.7" y="0" dx="0.6" dy="0.7" layer="1" thermals="no"/>
+<smd name="K" x="0.7" y="0" dx="0.6" dy="0.7" layer="1" thermals="no"/>
+<rectangle x1="-0.6" y1="-0.4" x2="0.6" y2="0.4" layer="51"/>
+</package>
+<package name="HEADER-0.1&quot;_2X3-SMD-SULLINS">
+<smd name="1" x="-2.54" y="-3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="3" x="0" y="-3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="5" x="2.54" y="-3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="6" x="2.54" y="3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="4" x="0" y="3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="2" x="-2.54" y="3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<rectangle x1="-3.81" y1="-2.54" x2="3.81" y2="2.54" layer="51"/>
+<rectangle x1="-0.32" y1="-5.335" x2="0.32" y2="-0.95" layer="51"/>
+<rectangle x1="-2.86" y1="-5.335" x2="-2.22" y2="-0.95" layer="51"/>
+<rectangle x1="2.22" y1="-5.335" x2="2.86" y2="-0.95" layer="51"/>
+<rectangle x1="2.22" y1="0.95" x2="2.86" y2="5.335" layer="51"/>
+<rectangle x1="-0.32" y1="0.95" x2="0.32" y2="5.335" layer="51"/>
+<rectangle x1="-2.86" y1="0.95" x2="-2.22" y2="5.335" layer="51"/>
+<wire x1="-4" y1="2.75" x2="-4" y2="-2" width="0.25" layer="21"/>
+<wire x1="-4" y1="-2" x2="-4" y2="-2.25" width="0.25" layer="21"/>
+<wire x1="-4" y1="-2.25" x2="-4" y2="-2.5" width="0.25" layer="21"/>
+<wire x1="-4" y1="-2.5" x2="-4" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="-4" y1="-2.75" x2="-3.75" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="-3.75" y1="-2.75" x2="-3.5" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="-3.5" y1="2.75" x2="-4" y2="2.75" width="0.25" layer="21"/>
+<wire x1="-1.5" y1="2.75" x2="-1" y2="2.75" width="0.25" layer="21"/>
+<wire x1="1" y1="2.75" x2="1.5" y2="2.75" width="0.25" layer="21"/>
+<wire x1="3.5" y1="2.75" x2="4" y2="2.75" width="0.25" layer="21"/>
+<wire x1="-1.5" y1="-2.75" x2="-1" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="1" y1="-2.75" x2="1.5" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="3.5" y1="-2.75" x2="4" y2="-2.75" width="0.25" layer="21"/>
+<wire x1="4" y1="-2.75" x2="4" y2="2.75" width="0.25" layer="21"/>
+<wire x1="-4" y1="-2.5" x2="-3.75" y2="-2.75" width="0.25" layer="21" curve="180"/>
+<wire x1="-4" y1="-2.25" x2="-4" y2="-2.75" width="0.25" layer="21" curve="87.753395"/>
+<wire x1="-4" y1="-2.75" x2="-3.5" y2="-2.75" width="0.25" layer="21" curve="92.246605"/>
+<wire x1="-3.5" y1="-3" x2="-4" y2="-2" width="0.25" layer="21" curve="-180"/>
+<wire x1="-3.5" y1="-2.75" x2="-3.5" y2="-3" width="0.25" layer="21"/>
 </package>
 </packages>
 <symbols>
@@ -6206,6 +6251,15 @@ GOI:
 <technology name=""/>
 </technologies>
 </device>
+<device name="-XHP35" package="XLAMP_XHP35">
+<connects>
+<connect gate="G$1" pin="A" pad="A"/>
+<connect gate="G$1" pin="C" pad="C"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
 </devices>
 </deviceset>
 <deviceset name="DXL_TTL" prefix="DXL">
@@ -6388,6 +6442,42 @@ GOI:
 </technologies>
 </device>
 <device name="-Z-BEND_RM" package="Z-BEND_RM">
+<connects>
+<connect gate="G$1" pin="A" pad="A"/>
+<connect gate="G$1" pin="C" pad="K"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-SOD923" package="SOD923(0.2MM)">
+<connects>
+<connect gate="G$1" pin="A" pad="A"/>
+<connect gate="G$1" pin="C" pad="K"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-SOD323" package="SOD323">
+<connects>
+<connect gate="G$1" pin="A" pad="A"/>
+<connect gate="G$1" pin="C" pad="K"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-SOD323F" package="SOD323F">
+<connects>
+<connect gate="G$1" pin="A" pad="A"/>
+<connect gate="G$1" pin="C" pad="K"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="-SOD523" package="SOD523">
 <connects>
 <connect gate="G$1" pin="A" pad="A"/>
 <connect gate="G$1" pin="C" pad="K"/>

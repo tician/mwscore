@@ -4,11 +4,11 @@
  *******************************************************************************
  *  A header file of questionable quality containing the address tables of
  *    several Dynamixel devices.  It should work with the AX-12/18, AX-S1,
- *    AX-S20, HaViMo2, Jon Hylands' FootPressureSensor kit, MX-28, IR Sensor 
+ *    AX-S20, HaViMo2, Jon Hylands' FootPressureSensor kit, MX-28, IR Sensor
  *    array, and CM-730.
- *  
+ *
  *******************************************************************************
- * Copyright (c) 2015, Matthew Paulishen.
+ * Copyright (c) 2015, 2016, Matthew Paulishen.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -19,9 +19,9 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ *     * Neither the name of VersaCoMa nor the names of its contributors
+ *       may be used to endorse or promote products derived from this
+ *       software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -58,6 +58,17 @@ extern "C" {
 #define MODEL_MX28                      29
 #define MODEL_IRSA                      330     // 0x014A
 #define MODEL_XL320                     350
+
+#define MODEL_H54_100_S500_R			53768
+#define MODEL_H54_200_S500_R			54024
+#define MODEL_H42_20_S300_R				51200
+#define MODEL_M54_60_S250_R				46352
+#define MODEL_M54_40_S250_R				46096
+#define MODEL_M42_10_S260_R				43288
+#define MODEL_L54_50_S500_R				38152
+#define MODEL_L54_30_S500_R				37896
+#define MODEL_L54_50_S290_R				38176
+#define MODEL_L54_30_S400_R				37928
 
 
 

@@ -2,7 +2,7 @@
  *******************************************************************************
  * YETIS MechWarfare - UDP Interface for ESP8266 YETIS-ponder
  *******************************************************************************
- * Copyright (c) 2015, Matthew Paulishen.
+ * Copyright (c) 2015, 2016, Matthew Paulishen.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,9 +13,9 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ *     * Neither the name of VersaCoMa nor the names of its contributors
+ *       may be used to endorse or promote products derived from this
+ *       software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -37,21 +37,22 @@
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// YETIS MechWarfare Transponder 'Connect'/'Multicast Test' Request Packet
-// (total_size = 1+3+1+2+Length+2 = 9+Length)
-Header		UINT8				0xF0
-Counter		UINT24				Packet Counter (default to 0 for connect)
+// (total_size = 4+1+2+ Length +2 = 9+Length)
+Counter		UINT32				Packet Counter (default to 0 for connect)
 ID			UINT8				Transponder ID (default to 0 for connect)
 Length		UINT16				Length of DATA array in bytes (4 bytes)
-DATA		UINT8[Length]		Data array (4-byte ChipID)
 CRC			UINT16				DXL2.0 CRC
+DATA		UINT8[Length]		Data array (4-byte ChipID)
 
 
 
 
 /// YETIS MechWarfare Control System Packet
-// (total_size = 1+3+1+2+ Length +2 = 9+Length) (Length>=2)
-Header		UINT8				0xF5
-Counter		UINT24				Packet Counter (dump if older than last)
+// (total_size = 4+1+2+ (1+2+Length) + 2 = 9+ (1+2+Length)
+Counter		UINT32				Packet Counter (dump if older than last)
+ID			UINT8				Transponder ID
+Length		UINT16				Length of DATA array in bytes
+CRC			UINT16				DXL2.0 CRC
 State		UINT8				GAME STATE + INSTRUCTION/COMMAND
 									GGGx xxCC
 										G = 000 (GAMEOFF) (SAFE)
@@ -65,10 +66,8 @@ State		UINT8				GAME STATE + INSTRUCTION/COMMAND
 											01 (START_OF_GAME_DATA)
 											10 (TRANSPONDER_SETUP)
 //											11 (REQUEST_TRANSPONDER_SETTINGS)
-Length		UINT16				Length of DATA array in bytes
 Time		UINT16				Match Time Remaining in 0.1[s]
-DATA		UINT8[Length-2]		Data array
-CRC			UINT16				DXL2.0 CRC
+DATA		UINT8[Length]		Additional data array
 
 DATA array types
 	REGULAR_STATUS_UPDATE (multicast) ( Length = (3*N) )
@@ -103,14 +102,13 @@ DATA array types
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// YETIS MechWarfare Transponder Response Packet
-// (total_size = 1+3+1+2+Length+2 = 9+Length)
-Header		UINT8				0xF5
-Counter		UINT24				Packet Counter (dump if older than last)
+// (total_size = 4+1+2+Length+2 = 9+Length)
+Counter		UINT32				Packet Counter (dump if older than last)
 									(each transponder counter initialized to random number by server at setup and tracked by server)
 ID			UINT8				Transponder ID
 Length		UINT16				Length of DATA array in bytes
-DATA		UINT8[Length]		Data array
 CRC			UINT16				DXL2.0 CRC
+DATA		UINT8[Length]		Data array
 
 DATA array types
 	POLL_TRANSPONDER response (bot) ( Length = 2 )
@@ -145,14 +143,13 @@ DATA array types
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// YETIS MechWarfare Transponder Passthrough Packet
-// (total_size = 1+3+1+2+Length+2 = 9+Length) (Length>=0)
-Header		UINT8				0xFD
-Counter		UINT24				Packet Counter (dump if older than last)
+// (total_size = 4+1+2+Length+2 = 9+Length) (Length>=0)
+Counter		UINT32				Packet Counter (dump if older than last)
 									(each transponder counter initialized to random number by server at setup and tracked by server)
 ID			UINT8				Transponder ID
 Length		UINT16				Length of DATA array in bytes
-DATA		UINT8[Length]		Data array
 CRC			UINT16				DXL2.0 CRC
+DATA		UINT8[Length]		Data array
 
 
 
@@ -160,12 +157,12 @@ CRC			UINT16				DXL2.0 CRC
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// YETIS MechWarfare Transponder Motion Command Packet
-// (total_size = 1+3+1+2+ Length +2 = 9+Length) (Length>=1)
-Header		UINT8				0xFA
-Counter		UINT24				Packet Counter (dump if older than last)
+// (total_size = 4+1+2+ Length +2 = 9+Length) (Length>=1)
+Counter		UINT32				Packet Counter (dump if older than last)
 									(each transponder counter initialized to random number by server at setup and tracked by server)
 ID			UINT8				Transponder ID
 Length		UINT16				Length of DATA array in bytes
+CRC			UINT16				DXL2.0 CRC
 INST		UINT8				Instruction/Response Type
 									0x00 = STOP
 									0x01 = Store pose, but do not yet play
@@ -173,23 +170,21 @@ INST		UINT8				Instruction/Response Type
 									0x03 = Interpolate to this pose from current
 									0x0 = 
 DATA		UINT8[Length-1]		Data array
-CRC			UINT16				DXL2.0 CRC
 
 
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 /// YETIS MechWarfare Transponder Motion Response Packet
-// (total_size = 1+3+1+2+ Length +2 = 9+Length) (Length>=2)
-Header		UINT8				0xFA
-Counter		UINT24				Packet Counter (dump if older than last)
+// (total_size = 4+1+2+ Length +2 = 9+Length) (Length>=2)
+Counter		UINT32				Packet Counter (dump if older than last)
 									(each transponder counter initialized to random number by server at setup and tracked by server)
 ID			UINT8				Transponder ID
 Length		UINT16				Length of DATA array in bytes
+CRC			UINT16				DXL2.0 CRC
 INST		UINT8				Instruction/Response Type
 ERROR		UINT8				Errors
 DATA		UINT8[Length-2]		Data array
-CRC			UINT16				DXL2.0 CRC
 
 
 */
@@ -264,3 +259,4 @@ namespace mechwarfare
 }//namespace mechwarfare
 
 #endif //_YETIS_MW_UDP_H_
+

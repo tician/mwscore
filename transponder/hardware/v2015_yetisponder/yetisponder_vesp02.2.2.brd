@@ -395,14 +395,14 @@ Yageo reflow footprint dimensions</description>
 <rectangle x1="6.03" y1="-0.32" x2="6.67" y2="0.32" layer="51"/>
 </package>
 <package name="HEADER-0.1&quot;_2X4-SMD-SULLINS">
-<smd name="1" x="-3.81" y="-3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="3" x="-1.27" y="-3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="5" x="1.27" y="-3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="7" x="3.81" y="-3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="8" x="3.81" y="3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="6" x="1.27" y="3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="4" x="-1.27" y="3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
-<smd name="2" x="-3.81" y="3.175" dx="1.27" dy="5.08" layer="1" thermals="no"/>
+<smd name="1" x="-3.81" y="-3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="3" x="-1.27" y="-3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="5" x="1.27" y="-3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="7" x="3.81" y="-3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="8" x="3.81" y="3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="6" x="1.27" y="3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="4" x="-1.27" y="3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
+<smd name="2" x="-3.81" y="3.175" dx="1" dy="5.08" layer="1" thermals="no"/>
 <rectangle x1="-5.08" y1="-2.54" x2="5.08" y2="2.54" layer="51"/>
 <rectangle x1="-1.59" y1="-5.335" x2="-0.95" y2="-0.95" layer="51"/>
 <rectangle x1="-4.13" y1="-5.335" x2="-3.49" y2="-0.95" layer="51"/>
@@ -1166,6 +1166,12 @@ tician modded.</description>
 <wire x1="26.5" y1="22.45" x2="25.85" y2="23.1" width="0.25" layer="1"/>
 </signal>
 </signals>
+<errors>
+<approved hash="4,1,56e76eaaa18313cf"/>
+<approved hash="4,1,de84a39aaed529c2"/>
+<approved hash="4,16,56e76eaaa18313cf"/>
+<approved hash="4,16,de84a39aaed529c2"/>
+</errors>
 </board>
 </drawing>
 <compatibility>

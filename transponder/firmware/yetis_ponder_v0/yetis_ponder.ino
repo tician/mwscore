@@ -2,7 +2,7 @@
  *******************************************************************************
  * YETIS MechWarfare - Transponder
  *******************************************************************************
- * Copyright (c) 2015, Matthew Paulishen.
+ * Copyright (c) 2015, 2016, Matthew Paulishen.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,9 +13,9 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ *     * Neither the name of VersaCoMa nor the names of its contributors
+ *       may be used to endorse or promote products derived from this
+ *       software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -34,9 +34,9 @@
 #include <WiFiUdp.h>
 #include <EEPROM.h>
 #include <Wire.h>
-#include "dynamixel.hpp"
-#include "yetis_udp.hpp"
-#include "yetis_i2c.hpp"
+#include "dynamixel.h"
+#include "yetis_udp.h"
+#include "yetis_i2c.h"
 
 // MWServer SSID
 char ServerSSID[] = "MechWarfare";
@@ -207,7 +207,7 @@ Default values grabbed from EEPROM at boot
 
   <!-- Number of Legs (2, 3, 4) -->
   <legs></legs>
-  
+
   <!-- Statically Stable (for 'twitch'-like bipeds/tripeds) -->
   <stable></stable>
 
@@ -356,7 +356,7 @@ INST		UINT8				Instruction/Response Type
 									0x01 = Store pose, but do not yet play
 									0x02 = Start interpolating to last sent pose
 									0x03 = Interpolate to this pose from current
-									0x0 = 
+									0x0 =
 DATA		UINT8[len]			Data array
 CRC			UINT16				DXL2.0 CRC
 
@@ -436,7 +436,7 @@ void loop()
 
 			// Get CRC value
 			uint16_t crc = (dat[len+0]) | (dat[len+1]<<8);
-			
+
 			uint16_t tempcrc = 0;
 			for (iter=0; iter<(resp-2); iter++)
 			{
@@ -459,7 +459,7 @@ void loop()
 			{
 				serverPacketCount = count;
 			}
-			
+
 			// Handle game state update for weapons
 			if (!state&(1<<7))
 			{
@@ -482,7 +482,7 @@ void loop()
 			delete[] buffy;
 		}
 
-		
+
 	}
 
 
@@ -525,7 +525,7 @@ void loop()
 	else
 	{
 	// Check semi-intelligent buss
-	
+
 	}
 
 

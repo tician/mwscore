@@ -2,7 +2,7 @@
  *******************************************************************************
  * YETIS MechWarfare - UDP Interface for ESP8266 YETIS-ponder
  *******************************************************************************
- * Copyright (c) 2015, Matthew Paulishen.
+ * Copyright (c) 2015, 2016, Matthew Paulishen.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,9 +13,9 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ *     * Neither the name of VersaCoMa nor the names of its contributors
+ *       may be used to endorse or promote products derived from this
+ *       software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -29,7 +29,7 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************
  */
-
+#include "yetis_udp.h"
 
 namespace mechwarfare
 {
@@ -38,7 +38,7 @@ yetisUDP::yetisUDP()
 {
 	ServerIP = {192, 168, 49, 13};
 	ServerPort = 0x1105;
-	
+
 	ServerPacketCount = 0;
 	TransponderPacketCount = 0;
 	TransponderID = 0;
@@ -312,12 +312,12 @@ uint8_t yetisUDP::handleMulticast()
 			// Have Flag?
 			if ( (MyState&0x4000) > 0 )
 			{
-				
+
 			}
 			// Capturing Point?
 			if ( (MyState&0x2000) > 0 )
 			{
-				
+
 			}
 
 			pushTransponderUpdate();
@@ -427,7 +427,7 @@ uint8_t yetisUDP::handleUnicast()
 			// Extract multicast address and port from response
 			McastIP = { buffy[13], buffy[14], buffy[15], buffy[16] };
 			McastPort = (buffy[17] + (buffy[18]<<8));
-			
+
 			return ERROR_NONE;
 		}
 		else if ( (GameState&0x03) == INST_START_OF_GAME )
@@ -462,7 +462,7 @@ uint8_t yetisUDP::handleUnicast()
 		{
 			return ERROR_ID_MISMATCH;
 		}
-		
+
 	}
 	else
 	{

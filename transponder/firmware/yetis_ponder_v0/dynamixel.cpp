@@ -2,7 +2,7 @@
  *******************************************************************************
  * DXL1.0/DXL2.0 library for Arduino HardwareSerial
  *******************************************************************************
- * Copyright (c) 2015, Matthew Paulishen.
+ * Copyright (c) 2015, 2016, Matthew Paulishen.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,9 +13,9 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ *     * Neither the name of VersaCoMa nor the names of its contributors
+ *       may be used to endorse or promote products derived from this
+ *       software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -29,8 +29,8 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *******************************************************************************
  */
- 
-#include "dynamixel.hpp"
+
+#include "dynamixel.h"
 namespace dynamixel
 {
 crc::crc(uint8_t *data, uint16_t len, uint16_t seed)
@@ -286,7 +286,7 @@ uint8_t dxl20::txrx(uint8_t *params, uint16_t &len, uint8_t id, uint8_t inst, ui
 
 //	free(params);
 
-// Handle RX 
+// Handle RX
 
 	// wait for new data
 	while (!dxl_uart_->available())
@@ -323,7 +323,7 @@ uint8_t dxl20::txrx(uint8_t *params, uint16_t &len, uint8_t id, uint8_t inst, ui
 			{
 				iter++;
 			}
-			
+
 			if (iter==7)
 			{
 				len_packet = (buffy_[5] + (buffy_[6]<<8));
@@ -434,7 +434,7 @@ uint8_t dxl20::rxtx(uint32_t timeout_to_message)
 			{
 				iter++;
 			}
-			
+
 			if (iter==7)
 			{
 				len_packet = (buffy_[5] + (buffy_[6]<<8));
@@ -499,13 +499,13 @@ uint8_t dxl20::rxtx(uint32_t timeout_to_message)
 	// Message intended for this dxl device
 	if ( buffy_[4] == device_id )
 	{
-		
+
 	}
 	// Message may have component intended for this dxl device
 	else if ( (buffy_[4] == BROADCAST_ID) && (other_dxl_.num==0) )
 	{
 		// Just a dxl device
-		
+
 	}
 	// Message may have component intended for this dxl device
 	else if ( (buffy_[4] == BROADCAST_ID) && (other_dxl_.num>0) )
@@ -517,38 +517,38 @@ uint8_t dxl20::rxtx(uint32_t timeout_to_message)
 		if ( buffy_[7] == INST_AX_SYNC_READ )
 		{
 			// Process AX psuedo SYNC_READ (READ all)
-			
+
 		}
 		else if ( buffy_[7] == INST_AX_BULK_READ )
 		{
 			// Process AX psuedo BULK_READ (READ all)
-			
+
 		}
 		else if ( buffy_[7] == INST_AX_BULK_WRITE )
 		{
 			// Process AX psuedo BULK_WRITE (WRITE all)
-			
+
 		}
 		else if ( buffy_[7] == INST_MIXED_SYNC_READ )
 		{
 			// Process AX psuedo SYNC_READ mixed with MX servos
 			// Try SYNC_READ and do plain READ for all that do not respond?
-			// Not sure MX servos will continue packet if previous servo 
+			// Not sure MX servos will continue packet if previous servo
 			//  did not provide its part of the packet (lost/missing).
 			// If don't complete packet, force user to split MX and AX/RX/EX
 			//  IDs: MX servos until ID==0 (SYNC_READ with new checksum),
 			//  then AX servos after (READ);
-			
+
 		}
 		else if ( buffy_[7] == INST_MIXED_BULK_READ )
 		{
 			// Process AX psuedo BULK_READ mixed with MX servos
-			
+
 		}
 		else if ( buffy_[7] == INST_MIXED_BULK_WRITE )
 		{
 			// Process AX psuedo BULK_WRITE mixed with MX servos
-			
+
 		}
 		else
 		{
@@ -825,7 +825,7 @@ uint8_t dxl10::txrx(uint8_t *params, uint8_t &len, uint8_t id, uint8_t inst, uin
 
 //	free(params);
 
-// Handle RX 
+// Handle RX
 
 	// wait for new data
 	while (!dxl_uart_->available())
@@ -858,7 +858,7 @@ uint8_t dxl10::txrx(uint8_t *params, uint8_t &len, uint8_t id, uint8_t inst, uin
 			{
 				iter++;
 			}
-			
+
 			if (iter==4)
 			{
 				len_packet = buffy_[3];
@@ -926,7 +926,7 @@ uint8_t dxl10::checksum(uint8_t *data, uint8_t len)
 	{
 		temp += data[iter];
 	}
-	
+
 	return (uint8_t) ~(temp&0xFF);
 }
 

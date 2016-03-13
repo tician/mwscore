@@ -2,7 +2,7 @@
  *******************************************************************************
  * YETIS MechWarfare - I2C Interface
  *******************************************************************************
- * Copyright (c) 2015, Matthew Paulishen.
+ * Copyright (c) 2015, 2016, Matthew Paulishen.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -13,9 +13,9 @@
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimer in the
  *       documentation and/or other materials provided with the distribution.
- *     * Neither the name of the <organization> nor the
- *       names of its contributors may be used to endorse or promote products
- *       derived from this software without specific prior written permission.
+ *     * Neither the name of VersaCoMa nor the names of its contributors
+ *       may be used to endorse or promote products derived from this
+ *       software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -34,7 +34,7 @@
 #define _YETIS_I2C_SPONDER_H_
 
 #include <Wire.h>
-#include "yetis_i2c_devs.hpp"
+#include "yetis_i2c_devs.h"
 
 namespace mechwarfare
 {
@@ -49,7 +49,7 @@ namespace mechwarfare
 		uint8_t numFCB;
 
 	protected:
-		
+
 	public:
 		yetisI2C() {yetisI2C(0,2);}
 		yetisI2C(int sda, int scl);

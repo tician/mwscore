@@ -2,7 +2,7 @@
   BioloidController.h - ArbotiX Library for Bioloid Pose Engine
   Copyright (c) 2008-2012 Michael E. Ferguson.  All right reserved.
 
-  Copyright (c) 2012, 2013 Matthew Paulishen. Copypaster: NaN a.k.a. tician
+  Copyright (c) 2012, 2013, 2016 Matthew Paulishen.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -19,12 +19,13 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#ifndef CM9_BC_h
-#define CM9_BC_h
+#ifndef _VERSACOMA_BC_H_
+#define _VERSACOMA_BC_H_
 
-#include <Arduino-compatibles.h>
-#include "stdlib.h"
-#include <dynamixel.h>
+//#include <Arduino-compatibles.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include "dynamixel.h"
 
 /* @def __FLASH__
  * @brief This is the attribute required to have the poses and sequences stored
@@ -34,6 +35,25 @@
 #define __FLASH__ __attr_flash
 #endif
 
+class DynamixelServo
+{
+public:
+	uint8_t		identity_;	// Device/Servo ID number
+	int32_t		offset_;	// Actuator position offset (ticks)
+
+	uint16_t	model_;		// Device/Servo model number
+	int32_t		range_min_;	// Device/Servo minimum position value
+							// (   0,    0, ...)
+	int32_t		range_max_;	// Device/Servo maximum position value
+							// (1024, 4096, ...)
+	uint8_t		shift_;		// (   6,    4,   0)
+	uint8_t		mode_;		// Device/Servo operating mode
+}
+
+
+
+
+
 /* @def BIOLOID_SHIFT
  * @brief This is a bit-shift value to increase resolution of internal pose
  * calculations within the BioloidController object.
@@ -41,7 +61,7 @@
 /// Desire some extra resolution during interpolation
 // AX: use 16 bits, rather than 10
 // MX: use 16 bits, rather than 12
-#define BIOLOID_SHIFT				6
+//#define BIOLOID_SHIFT				6
 
 /// BioloidController Pose
 /** @class bc_pose_t 
@@ -50,8 +70,7 @@
  * integer. A bc_pose_t* is a pose.  It is an array of unsigned integers
  * representing a collection of servo goal positions to be reached simultaneously.
  */
-//#define bc_pose_t unsigned int
-typedef uint16_t bc_pose_t;
+typedef int32_t bc_pose_t;
 
 /// BioloidController Sequence
 /** @class bc_seq_t 
@@ -64,7 +83,7 @@ typedef uint16_t bc_pose_t;
 typedef struct
 {
 	bc_pose_t * pose;					// address of pose
-	uint16_t time;						// time interval for transition
+	uint32_t time;						// time interval for transition
 } bc_seq_t; 							// BC sequence
 
 /// RoboPlus Motion Page compatibility structure
@@ -168,7 +187,7 @@ public:
 	 * @param id The numerical ID of the target servo.
 	 * @param pos The position value of the target servo.
 	 */
-	void setNextPose(uint8_t id, int16_t pos);
+	void setNextPose(uint8_t id, int32_t pos);
 
 	/**
 	 * @brief Set the number of servos used in the pose currently stored in RAM.
@@ -200,11 +219,12 @@ public:
 	 * @brief Set the 'resolution' of servos used in the object.
 	 * @details The 'resolution' is essentially the maximum permissible goal 
 	 * position value (1023 for AX/RX/EX servos and 4096 for MX servos).
-	 * @param id The numerical ID of the servo to have its 'resolution' modified.
-	 * @param res The desired 'resolution' of the servo.
-	 * @return The actual 'resolution' of the servo used by the engine.
+	 * Dynamixel Pro servos have larger signed integer ranges.
+	 * @param id The numerical ID of the servo to have its range modified.
+	 * @param range The desired range of the servo.
+	 * @return The actual range of the servo used by the engine.
 	 */
-	uint16_t setResolution(uint8_t id, uint16_t res);
+	uint16_t setResolution(uint8_t id, int32_t range);
 
 	/**
 	 * @brief Load joint calibration offsets.
@@ -212,7 +232,7 @@ public:
 	 * robots by compensating for servo position control variations.
 	 * @param addr The name/pointer of the int array containing the offset values.
 	 */
-	void loadOffsets( int16_t * addr );
+//	void loadOffsets( int16_t * addr );
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -228,7 +248,7 @@ public:
 	 * @see loadPose()
 	 * @see readPose()
 	 */
-	void interpolateSetup(unsigned int time);
+	void interpolateSetup(uint32_t time);
 	/**
 	 * @brief Moves forward one time step in the current interpolation.
 	 * @details When called, it will wait for time interval of interpolation
@@ -303,13 +323,13 @@ public:
 	 * @brief Starts a series of motion "pages" from the RoboPlusMotion_Array.
 	 * @param index Index of "page" to play (may be identical to that used in Task).
 	 */
-	void MotionPage(unsigned int page_index);
+	void MotionPage(uint16_t page_index);
 	/**
 	 * @brief Wrapper function for MotionPage(unsigned int).
 	 * @param index Index of "page" to play (may be identical to that used in Task).
 	 * @see MotionPage(unsigned int)
 	 */
-	void setMotionPage(unsigned int page_index) { MotionPage(page_index); }
+	void setMotionPage(uint16_t page_index) { MotionPage(page_index); }
 	/**
 	 * @brief Check the status of the currently running motion "page".
 	 * @return Boolean state of motion engine.
@@ -319,13 +339,13 @@ public:
 	 * @brief Retrieve the index of the currently running motion "page".
 	 * @return The index of the currently running motion "page".
 	 */
-	unsigned int MotionPage();
+	uint16_t MotionPage();
 	/**
 	 * @brief Wrapper function for MotionPage().
 	 * @return The index of the currently running motion "page".
 	 * @see MotionPage()
 	 */
-	unsigned int getMotionPage() { return MotionPage(); }
+	uint16_t getMotionPage() { return MotionPage(); }
 	/**
 	 * @brief Continue playing a motion "page".  Must be called periodically to progress to next intermediate pose, next goal pose, and/or next sequence.
 	 * @see MotionPage(unsigned int)
@@ -353,7 +373,7 @@ public:
 	 * @param mult The desired time modifier.
 	 * @return The actual time modifier.
 	 */
-	unsigned int setTimeModifier(unsigned int mult);
+	uint32_t setTimeModifier(uint32_t mult);
 	/**
 	 * @brief Set the motion engine's interpolation time length.
 	 * @details This is the time between each calculation of an intermediate
@@ -361,7 +381,7 @@ public:
 	 * @param mult The desired time length.
 	 * @return The actual time length.
 	 */
-	unsigned int setFrameLength(unsigned int time);
+	uint32_t setFrameLength(uint32_t time);
 
 
 
@@ -369,33 +389,33 @@ public:
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 private:
 	// Servo IDs for this BioloidController object
-	unsigned char * id_;
+	uint8_t * id_;
 	// Present servo positions
 	bc_pose_t * pose_;
 	// Final desired servo positions
 	bc_pose_t * nextpose_;
 	// Change in each servo position per interpolation step
-	int * deltas_;
+	int32_t * deltas_;
 	// Calibration offsets for each servo
-	int * offsets_;
+	int32_t * offsets_;
 	// 'Resolution' of each servo
-	unsigned int * resolutions_;
+	int32_t * resolutions_;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// Number of servos used by current pose.
-	unsigned int poseSize_;
+	uint8_t poseSize_;
 	// Number of servos controllable by this BioloidController object
-	unsigned int numServos_;
+	uint8_t numServos_;
 
 	// Time {from millis()} when last position change occurred
-	unsigned long lastframe_;
+	uint32_t lastframe_;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// Currently running sequence
 	bc_seq_t * sequence_;
 	// Number of transitions remaining in current interpolation
-	unsigned int transitions_;
-	unsigned int seqIndex_;
+	uint8_t transitions_;
+	uint8_t seqIndex_;
 
 	// MotionEngine control state
 	enum
@@ -410,8 +430,8 @@ private:
 	// RoboPlusMotion Array pointer
 	rpm_page_t * rpmArray_;
 	// RoboPlusMotion Array index
-	unsigned int rpmIndexNow_;
-	unsigned int rpmIndexInput_;
+	uint8_t rpmIndexNow_;
+	uint8_t rpmIndexInput_;
 
 	// RoboPlusMotion control state
 	enum
@@ -433,9 +453,10 @@ private:
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// Temporal modifier
-	unsigned int timeModder_;
+	uint32_t timeModder_;
 	// Length (in milliseconds) of each step in interpolation
-	unsigned int frameLength_;
+	uint32_t frameLength_;
 	
 };
-#endif
+#endif //_VERSACOMA_BC_H_
+
