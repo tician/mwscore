@@ -11,12 +11,12 @@
 			"file": "yetis_ponder.ino",
 			"settings":
 			{
-				"buffer_size": 13974,
+				"buffer_size": 13968,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "yetis_udp.hpp",
+			"file": "yetis_udp.h",
 			"settings":
 			{
 				"buffer_size": 8902,
@@ -27,31 +27,7 @@
 			"file": "yetis_udp.cpp",
 			"settings":
 			{
-				"buffer_size": 11356,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "dxl_devices.h",
-			"settings":
-			{
-				"buffer_size": 21491,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "dynamixel.hpp",
-			"settings":
-			{
-				"buffer_size": 9076,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "dynamixel.cpp",
-			"settings":
-			{
-				"buffer_size": 21163,
+				"buffer_size": 11378,
 				"line_ending": "Unix"
 			}
 		},
@@ -59,7 +35,7 @@
 			"file": "versacoma_bc.h",
 			"settings":
 			{
-				"buffer_size": 15659,
+				"buffer_size": 0,
 				"line_ending": "Unix"
 			}
 		},
@@ -67,15 +43,15 @@
 			"file": "versacoma_bc.cpp",
 			"settings":
 			{
-				"buffer_size": 18306,
+				"buffer_size": 0,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "yetis_i2c.hpp",
+			"file": "yetis_i2c.h",
 			"settings":
 			{
-				"buffer_size": 2692,
+				"buffer_size": 2690,
 				"line_ending": "Unix"
 			}
 		},
@@ -83,7 +59,7 @@
 			"file": "yetis_i2c.cpp",
 			"settings":
 			{
-				"buffer_size": 9279,
+				"buffer_size": 9301,
 				"line_ending": "Unix"
 			}
 		}
@@ -112,6 +88,12 @@
 	},
 	"file_history":
 	[
+		"/media/dee/src/github/trossen/mechwarfare/mwscore/transponder/firmware/yetis_ponder_v0/dynamixel.cpp",
+		"/media/dee/src/github/trossen/mechwarfare/mwscore/transponder/firmware/yetis_ponder_v0/dynamixel.h",
+		"/media/dee/src/github/trossen/mechwarfare/mwscore/transponder/firmware/yetis_ponder_v0/dxl_devices.h",
+		"/media/dee/src/github/trossen/mechwarfare/mwscore/transponder/firmware/yetis_ponder_v0/dynamixel.hpp",
+		"/media/dee/src/github/trossen/mechwarfare/mwscore/transponder/firmware/yetis_ponder_v0/yetis_i2c.hpp",
+		"/media/dee/src/github/trossen/mechwarfare/mwscore/transponder/firmware/yetis_ponder_v0/yetis_udp.hpp",
 		"/home/rbom/.config/sublime-text-2/Packages/User/Preferences.sublime-settings",
 		"/media/dee/src/github/trossen/mechwarfare/mwscore/transponder/firmware/yetis_ponder_v0/yetis_ponder.ino",
 		"/media/dee/src/parts/ARM/kinetis/ksdk/KSDK_1.3.0/examples/frdmkl03z/demo_apps/hello_world/hardware_init.c",
@@ -163,15 +145,15 @@
 					"file": "yetis_ponder.ino",
 					"settings":
 					{
-						"buffer_size": 13974,
+						"buffer_size": 13968,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1006,
-								1006
+								2017,
+								2017
 							]
 						],
 						"settings":
@@ -187,7 +169,7 @@
 				},
 				{
 					"buffer": 1,
-					"file": "yetis_udp.hpp",
+					"file": "yetis_udp.h",
 					"settings":
 					{
 						"buffer_size": 8902,
@@ -197,8 +179,8 @@
 						"selection":
 						[
 							[
-								1031,
-								1031
+								0,
+								0
 							]
 						],
 						"settings":
@@ -217,15 +199,42 @@
 					"file": "yetis_udp.cpp",
 					"settings":
 					{
-						"buffer_size": 11356,
+						"buffer_size": 11378,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								828,
-								828
+								1911,
+								1911
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 135.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "versacoma_bc.h",
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
 							]
 						],
 						"settings":
@@ -240,47 +249,19 @@
 					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "dxl_devices.h",
-					"settings":
-					{
-						"buffer_size": 21491,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								543,
-								543
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"tab_size": 4,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
 					"buffer": 4,
-					"file": "dynamixel.hpp",
+					"file": "versacoma_bc.cpp",
 					"settings":
 					{
-						"buffer_size": 9076,
+						"buffer_size": 0,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								246,
-								246
+								0,
+								0
 							]
 						],
 						"settings":
@@ -296,18 +277,18 @@
 				},
 				{
 					"buffer": 5,
-					"file": "dynamixel.cpp",
+					"file": "yetis_i2c.h",
 					"settings":
 					{
-						"buffer_size": 21163,
+						"buffer_size": 2690,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1021,
-								1021
+								1970,
+								1970
 							]
 						],
 						"settings":
@@ -323,99 +304,18 @@
 				},
 				{
 					"buffer": 6,
-					"file": "versacoma_bc.h",
-					"settings":
-					{
-						"buffer_size": 15659,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "versacoma_bc.cpp",
-					"settings":
-					{
-						"buffer_size": 18306,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "yetis_i2c.hpp",
-					"settings":
-					{
-						"buffer_size": 2692,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								230,
-								230
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.tmLanguage",
-							"translate_tabs_to_spaces": false
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 9,
 					"file": "yetis_i2c.cpp",
 					"settings":
 					{
-						"buffer_size": 9279,
+						"buffer_size": 9301,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								231,
-								231
+								1887,
+								1887
 							]
 						],
 						"settings":
